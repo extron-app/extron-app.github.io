@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#090f23">
+<link rel="apple-touch-icon" href="icon-192.png">  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extron - Tasks & Rewards</title>
+    <!-- Tailwind CSS for dashboard elements -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- SweetAlert2 for modern professional popups -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- QR generate + scan for Wallet -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <!-- Google Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style> 
+        .hidden { 
+            display: none !important; 
+        }
+        
+        /* Global & Reset Stylings */
+        * { 
+            font-family: 'Poppins', sans-serif !important; 
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            background: #020617; 
+            color: white; 
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Floating Canvas particles fixed on background */
+        #bgCanvas { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 0; 
+            pointer-events: none;
+        }
+
+        /* Animations from Reference */
+        .animate-in { 
+            animation: fadeIn 1.5s ease-in-out forwards; 
+        }
+        @keyframes fadeIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+
+        /* Centered login setup container */
+        .login-container { 
+            text-align: center; 
+            z-index: 10; 
+            padding: 20px; 
+            width: 100%; 
+            position: fixed; 
+            inset: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .login-container h1 { 
+            font-size: 5rem; 
+            margin-bottom: 10px; 
+            background: linear-gradient(to right, #3b82f6, #8b5cf6); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            font-weight: 900; 
+            font-style: italic; 
+            padding-right: 0.15em; 
+            padding-left: 0.15em;  
+        }
+        .login-container p { 
+            font-size: 1.2rem; 
+            color: #94a3b8; 
+            margin-bottom: 40px; 
+        }
+        .login-container button { 
+            padding: 18px 30px; 
+            width: 340px; 
+            border-radius: 50px; 
+            border: none; 
+            background: linear-gradient(to right, #3b82f6, #8b5cf6); 
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+        }
+        .login-container button:hover { 
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); 
+        }
+        .input-group { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px; 
+        }
+
+        /* Mobile adaptation for Login */
+        @media (max-width: 480px) {
+            .login-container h1 { 
+                font-size: 3.5rem; 
+                padding-right: 0.15em; 
+                padding-left: 0.15em;
+            }
+            .login-container p { 
+                font-size: 1rem; 
+                margin-bottom: 30px; 
+            }
+            .login-container button { 
+                width: 300px; 
+                padding: 15px 20px; 
+            }
+        }
+
+        /* Text Gradients */
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Rounded buttons with gradient styling */
+        .gradient-btn {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            color: white;
+            font-weight: bold;
+            transition: 0.3s;
+            border: none;
+        }
+        .gradient-btn:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+        }
+
+        /* Glassmorphism for Dashboard cards */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            backdrop-filter: blur(8px);
+        }
+        .glass-card:hover {
+            border-color: rgba(139, 92, 246, 0.35);
+        }
+
+        /* Premium Glow Effect for Floating Balance Card */
+        .premium-glow {
+            box-shadow: 0 20px 40px -15px rgba(59, 130, 246, 0.35), 0 0 25px 0 rgba(139, 92, 246, 0.2) !important;
+            border: 1px solid rgba(139, 92, 246, 0.35) !important;
+        }
+
+        /* --- STABLE LOCAL CSS FOR ALL DASHBOARD ELEMENTS --- */
+        .dashboard-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0 15px 80px 15px; 
+        }
+
+        /* Navigation Bar */
+        .header-nav {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 15px 0 !important;
+            border-bottom: 1px solid #1e293b !important;
+            margin-bottom: 20px !important;
+            width: 100% !important;
+        }
+        .header-logo {
+            font-size: 1.2rem !important;
+            font-weight: 900 !important;
+            font-style: italic !important;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.1em;
+        }
+        .header-user-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+        }
+        .username-badge {
+            font-size: 10px !important;
+            font-weight: bold !important;
+            color: #60a5fa !important;
+            background: rgba(59, 130, 246, 0.1) !important;
+            border: 1px solid rgba(59, 130, 246, 0.3) !important;
+            padding: 6px 12px !important;
+            border-radius: 50px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .logout-badge-btn {
+            font-size: 10px !important;
+            font-weight: bold !important;
+            color: #f87171 !important;
+            background: rgba(239, 68, 68, 0.1) !important;
+            border: 1px solid rgba(239, 68, 68, 0.2) !important;
+            padding: 6px 12px !important;
+            border-radius: 50px !important;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .logout-badge-btn:hover {
+            background: rgba(239, 68, 68, 0.2) !important;
+        }
+
+        /* Compact Premium Balance Card */
+        .balance-card-box {
+            background: linear-gradient(135deg, #0c1328, #070b18) !important;
+            border: 1px solid rgba(139, 92, 246, 0.35) !important;
+            border-radius: 1.8rem !important;
+            padding: 18px 22px !important; 
+            margin-bottom: 15px !important; 
+            position: relative;
+            box-shadow: 0 15px 35px -10px rgba(59, 130, 246, 0.3) !important;
+            width: 100% !important;
+        }
+        .balance-card-title {
+            color: #94a3b8 !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.15em !important;
+            margin-bottom: 4px !important;
+        }
+        .balance-card-amount-row {
+            display: flex !important;
+            align-items: baseline !important;
+            gap: 10px !important;
+        }
+        .balance-card-currency {
+            font-size: 1.25rem !important;
+            font-weight: bold !important;
+            color: #a78bfa !important;
+            font-style: italic !important;
+        }
+        .balance-card-number {
+            font-size: 2.5rem !important; 
+            font-weight: 900 !important;
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- LOCAL CSS FOR DAILY CHECK-IN CARD --- */
+        .check-in-box {
+            background: linear-gradient(135deg, #0c1328, #070b18) !important;
+            border: 1px solid rgba(139, 92, 246, 0.2) !important;
+            border-radius: 1.8rem !important;
+            padding: 20px !important;
+            margin-bottom: 25px !important;
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1) !important;
+            width: 100% !important;
+        }
+        .check-in-title {
+            color: #e2e8f0 !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.15em !important;
+            text-align: left !important;
+            margin-bottom: 15px !important;
+        }
+        .circles-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-bottom: 20px !important;
+            width: 100% !important;
+            gap: 4px !important;
+        }
+        .check-circle {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            position: relative !important;
+        }
+        /* Completed Day Circle Indicator (Emerald Check) */
+        .check-circle-done {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border: 1.5px solid #10b981 !important;
+            color: #10b981 !important;
+        }
+        /* Current Active Day (Glowing neon Purple) */
+        .check-circle-active {
+            background: rgba(139, 92, 246, 0.15) !important;
+            border: 1.5px solid #8b5cf6 !important;
+            color: #c084fc !important;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.5) !important;
+        }
+        /* Future Locked Day (Slate Gray) */
+        .check-circle-locked {
+            background: rgba(30, 41, 59, 0.5) !important;
+            border: 1.5px solid #334155 !important;
+            color: #64748b !important;
+        }
+        .day-reward-label {
+            position: absolute !important;
+            bottom: -16px !important;
+            font-size: 8px !important;
+            color: #94a3b8 !important;
+            font-weight: bold !important;
+            white-space: nowrap !important;
+        }
+
+        /* Custom Tabs styling */
+        .tabs-menu {
+            display: flex !important;
+            gap: 10px !important;
+            background: #090f23 !important;
+            border: 1px solid #1e293b !important;
+            padding: 4px !important;
+            border-radius: 50px !important;
+            margin-bottom: 25px !important;
+            width: 100% !important;
+        }
+        .tab-menu-btn {
+            flex: 1 !important;
+            padding: 12px !important;
+            border-radius: 50px !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            text-align: center !important;
+            border: none !important;
+            transition: 0.3s !important;
+        }
+        .tab-btn-active {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+        }
+        .tab-btn-inactive {
+            background: transparent !important;
+            color: #94a3b8 !important;
+        }
+
+        /* Section Header Title */
+        .section-header-title {
+            font-size: 14px !important;
+            font-weight: bold !important;
+            color: #e2e8f0 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            margin-bottom: 15px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            font-style: italic !important;
+        }
+        .section-header-pill {
+            width: 5px !important;
+            height: 20px !important;
+            background: linear-gradient(to bottom, #3b82f6, #8b5cf6) !important;
+            border-radius: 10px !important;
+        }
+
+        /* Stable task row styling inside tasks container */
+        .task-row {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            gap: 15px !important;
+            background: rgba(15, 23, 42, 0.45) !important;
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+            backdrop-filter: blur(8px) !important;
+            padding: 20px !important;
+            border-radius: 1.8rem !important;
+            margin-bottom: 15px !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+        }
+        .task-row:hover {
+            border-color: rgba(139, 92, 246, 0.35) !important;
+        }
+        .task-details {
+            flex: 1 !important;
+            min-width: 0 !important;
+            text-align: left !important;
+        }
+        .task-action {
+            flex-shrink: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+        }
+
+        /* Input design */
+        .glass-input {
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(5px);
+            color: white;
+            outline: none;
+        }
+        .glass-input:focus {
+            border-color: rgba(139, 92, 246, 0.8);
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+        }
+
+        /* --- SPIN WHEEL TAB STYLING --- */
+        .wheel-box {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 20px auto 10px auto;
+        }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ef4444; 
+            z-index: 10;
+            filter: drop-shadow(0px 4px 5px rgba(0,0,0,0.5));
+        }
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 6px solid #8b5cf6; 
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.1, 1);
+            background-color: #0f172a;
+        }
+        .slice {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            clip-path: polygon(50% 50%, 50% 0%, 89.1% 18.8%, 50% 50%);
+            transform: rotate(calc(var(--i) * 51.43deg));
+            background-color: var(--color);
+            transform-origin: 50% 50%;
+        }
+        .slice span {
+            position: absolute;
+            top: 32px;
+            left: 52%;
+            transform: rotate(25.7deg);
+            transform-origin: bottom center;
+            font-weight: 900;
+            font-size: 11px;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+            white-space: nowrap;
+        }
+        .center-pin {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #3b82f6, #8b5cf6);
+            border: 3px solid #fff;
+            border-radius: 50%;
+            z-index: 5;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* 4-tab fit */
+        .tabs-menu { gap: 4px !important; }
+        .tab-menu-btn { padding: 12px 4px !important; font-size: 11px !important; }
+
+        /* App-like feel: no long-press copy/select on UI text (inputs stay editable) */
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        input, textarea {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        img, svg, canvas {
+            -webkit-user-drag: none;
+        }
+    </style>
+</head>
+<body class="animate-in">
+
+    <!-- CANVAS PARTICLES BACKGROUND -->
+    <canvas id="bgCanvas"></canvas>
+
+    <!-- LOGIN PAGE -->
+    <div id="login-page" class="login-container hidden">
+        <h1>Extron</h1>
+        <p>Complete tasks and earn EXT rewards</p>
+        <div class="input-group">
+            <button onclick="login()" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92( 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Sign in with Google
+            </button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard-page" class="hidden min-h-screen relative z-10">
+        
+        <div class="dashboard-container">
+            
+            <header class="header-nav">
+                <span class="header-logo">EXTRON</span>
+                <div class="header-user-actions">
+                    <button id="admin-toggle-btn" onclick="toggleAdminView()" class="text-[10px] bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full font-bold uppercase shadow-lg shadow-blue-500/20 hidden">Admin</button>
+                    <span id="display-name" class="username-badge">...</span>
+                    <button onclick="logout()" class="logout-badge-btn">Logout</button>
+                </div>
+            </header>
+
+            <div id="main-content-view">
+                
+                <div id="balance-card" class="balance-card-box" style="transform: translateY(-4px); transition: all 0.3s ease;">
+                    <div class="balance-card-title">Your Balance</div>
+                    <div class="balance-card-amount-row">
+                        <span class="balance-card-currency">EXT</span>
+                        <span id="ext-balance" class="balance-card-number">0</span>
+                    </div>
+                </div>
+
+                <div id="check-in-card" class="check-in-box">
+                    <!-- Daily Check-in content loaded via JS -->
+                </div>
+
+                <div class="tabs-menu">
+                    <button onclick="showTab('tasks')" id="tab-tasks-btn" class="tab-menu-btn tab-btn-active">TASKS</button>
+                    <button onclick="showTab('spin')" id="tab-spin-btn" class="tab-menu-btn tab-btn-inactive">SPIN</button>
+                    <button onclick="showTab('wallet')" id="tab-wallet-btn" class="tab-menu-btn tab-btn-inactive">WALLET</button>
+                    <button onclick="showTab('refer')" id="tab-refer-btn" class="tab-menu-btn tab-btn-inactive">REFERRAL</button>
+                </div>
+
+                <!-- TASKS SECTION -->
+                <div id="tasks-section">
+                    <h3 class="section-header-title">
+                        <span class="section-header-pill"></span> Tasks
+                    </h3>
+                    <div id="tasks-list">
+                        <!-- Tasks list -->
+                    </div>
+                </div>
+
+                <!-- SPIN SECTION -->
+                <div id="spin-section" class="hidden">
+                    <div class="glass-card p-5 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                            <span class="section-header-pill"></span> Lucky Wheel
+                        </h3>
+                        <!-- Daily spin stats panel inside a nested glass layout -->
+                        <div style="background: #090f23; padding: 15px; border-radius: 1.5rem; border: 1px solid #1e293b; margin-bottom: 20px; font-size: 12px; line-height: 1.8;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Free Spin Status:</span>
+                                <span id="spin-free-status" class="gradient-text" style="font-weight: 900;">Loading...</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Extra Ad Spins:</span>
+                                <span id="spin-ad-status" class="gradient-text" style="font-weight: 900;">Loading...</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; margin-top: 8px; padding-top: 8px;">
+                                <span style="color: #64748b; font-size: 11px; font-weight: bold; text-transform: uppercase;">Global Reset In:</span>
+                                <span id="spin-reset-timer" style="color: #ef4444; font-family: monospace; font-weight: bold; font-size: 12px;">--:--:--</span>
+                            </div>
+                        </div>
+
+                        <!-- SPIN WHEEL CONTAINER -->
+                        <div class="wheel-box">
+                            <div class="pointer"></div>
+                            <div class="center-pin"></div>
+                            <div class="wheel" id="wheel">
+                                <div class="slice" style="--i:0; --color: rgba(30, 41, 59, 0.75);"><span>5 EXT</span></div>
+                                <div class="slice" style="--i:1; --color: rgba(59, 130, 246, 0.75);"><span>10 EXT</span></div>
+                                <div class="slice" style="--i:2; --color: rgba(124, 58, 237, 0.75);"><span>15 EXT</span></div>
+                                <div class="slice" style="--i:3; --color: rgba(139, 92, 246, 0.75);"><span>20 EXT</span></div>
+                                <div class="slice" style="--i:4; --color: rgba(245, 158, 11, 0.75);"><span>25 EXT</span></div>
+                                <div class="slice" style="--i:5; --color: rgba(239, 68, 68, 0.75);"><span>Try Again</span></div>
+                                <div class="slice" style="--i:6; --color: rgba(16, 185, 129, 0.75);"><span>Free Spin</span></div>
+                            </div>
+                        </div>
+
+                        <div id="spin-result-box" style="margin: 15px 0; min-height: 24px; text-align: center; font-weight: 900; font-size: 14px;" class="gradient-text">
+                            Tap below to test your luck!
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button id="spin-free-btn" onclick="useFreeSpin()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Play Daily Free Spin</button>
+                            <button id="spin-ad-btn" onclick="watchAdForSpin()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-4 rounded-full text-xs font-bold active:scale-95 transition-all">Watch Video to Spin</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WALLET SECTION -->
+                <div id="wallet-section" class="hidden">
+                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                            <span class="section-header-pill"></span> My Wallet
+                        </h3>
+                        <div style="background: #090f23; padding: 20px; border-radius: 1.5rem; border: 1px solid #1e293b; text-align: center;">
+                            <div id="wallet-qr" style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 14px;"></div>
+                            <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #64748b; margin-bottom: 8px; letter-spacing: 0.05em;">Your wallet address</p>
+                            <p id="wallet-address" style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; margin-bottom: 16px; background: #020617; padding: 12px; border-radius: 1rem; border: 1px solid #1e293b; font-weight: bold;">Loading...</p>
+                            <button onclick="copyWalletAddress()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Address</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                            <span class="section-header-pill"></span> Send EXT
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <input id="wallet-to" type="text" placeholder="Paste receiver address" class="w-full p-4 rounded-full glass-input text-sm" autocomplete="off">
+                            <button onclick="openQrScanner()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all">Scan QR Code</button>
+                            <input id="wallet-amount" type="number" inputmode="numeric" placeholder="Amount (min 1000 EXT)" class="w-full p-4 rounded-full glass-input text-sm">
+                            <p style="font-size: 10px; color: #64748b; text-align: center;">Minimum send amount: 1000 EXT</p>
+                            <button id="wallet-send-btn" onclick="sendExt()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">SEND EXT</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                            <span class="section-header-pill"></span> Transfer History
+                        </h3>
+                        <div id="wallet-history" class="flex flex-col gap-1">
+                            <p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REFERRAL SECTION -->
+                <div id="refer-section" class="hidden">
+                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 style="font-weight: bold; color: #e2e8f0; font-size: 1.125rem; margin-bottom: 4px;">Invite Friends</h3>
+                        <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 20px;">Earn <span class="gradient-text" style="font-weight: bold;">50 EXT</span> for every join!</p>
+                        
+                        <div style="background: #090f23; padding: 20px; border-radius: 1.5rem; border: 1px solid #1e293b; margin-bottom: 20px;">
+                            <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #64748b; margin-bottom: 8px; letter-spacing: 0.05em;">Copy your link</p>
+                            <p id="ref-link" style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; margin-bottom: 16px; background: #020617; padding: 12px; border-radius: 1rem; border: 1px solid #1e293b; font-weight: bold;">Generating...</p>
+                            <button onclick="copyRef()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Referral Link</button>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Invited Users:</span>
+                            <span id="ref-count" class="gradient-text" style="font-size: 1.25rem; font-weight: 900;">0</span>
+                        </div>
+                    </div>
+
+                    <!-- REFERRED FRIENDS LIST -->
+                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
+                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                            <span class="section-header-pill"></span> Referred Friends
+                        </h3>
+                        <div id="referred-users-list" class="flex flex-col gap-1">
+                            <p class="text-xs text-slate-500 text-center py-4">No referrals yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ADMIN PANEL VIEW -->
+    <div id="admin-view" class="max-w-md mx-auto p-5 hidden">
+        <h2 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 32px; background: linear-gradient(to bottom, #3b82f6, #8b5cf6); border-radius: 9999px;"></span> Control Panel
+        </h2>
+        
+        <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-8">
+            <h3 style="font-weight: bold; margin-bottom: 16px; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Create New Task</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <input id="admin-task-name" type="text" placeholder="Task Name (e.g. Subscribe Channel)" class="w-full p-4 rounded-full glass-input text-sm">
+                <input id="admin-task-url" type="text" placeholder="Target Link (https://...)" class="w-full p-4 rounded-full glass-input text-sm">
+                <input id="admin-task-reward" type="number" placeholder="Reward Amount (EXT)" class="w-full p-4 rounded-full glass-input text-sm">
+                <button onclick="saveTask()" class="w-full gradient-btn text-slate-950 font-black py-4 rounded-full shadow-lg shadow-blue-500/10 active:scale-95 transition-all">POST TASK</button>
+            </div>
+        </div>
+
+        <h3 style="font-weight: bold; margin-bottom: 16px; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Manage Active Tasks</h3>
+        <div id="admin-tasks-list">
+            <!-- Active tasks will list here -->
+        </div>
+    </div>
+
+    <!-- TRANSACTION RECEIPT OVERLAY -->
+    <div id="receiptOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <div id="receipt-card"></div>
+            <p style="text-align: center; font-size: 10px; color: #64748b; margin: 14px 0;">Take a screenshot to share this receipt as proof.</p>
+            <button onclick="closeReceipt()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all">Close</button>
+        </div>
+    </div>
+
+    <!-- QR SCANNER OVERLAY -->
+    <div id="qrOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <p style="font-weight: bold; color: #e2e8f0; font-size: 14px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.1em;">Scan Wallet QR</p>
+        <div id="qr-reader" style="width: 100%; max-width: 320px; border-radius: 1.5rem; overflow: hidden; background: #000;"></div>
+        <button onclick="closeQrScanner()" class="bg-slate-800 text-slate-300 border border-slate-700/50 px-8 py-3 rounded-full text-xs font-bold" style="margin-top: 20px;">Cancel</button>
+    </div>
+
+    <!-- GLOBAL LOADER -->
+    <div id="loader" class="fixed inset-0 bg-[#020617]/90 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
+        <div class="w-10 h-10 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin"></div>
+    </div>
+
+    <!-- SIMULATED REWARDED AD OVERLAY -->
+    <div id="adOverlay" class="fixed inset-0 bg-[#020617]/95 backdrop-blur-md flex items-center justify-center z-[100] hidden">
+        <div class="glass-card p-8 rounded-[2.5rem] border border-[rgba(139,92,246,0.35)] max-w-xs w-full text-center">
+            <h3 style="font-weight: bold; color: #8b5cf6; font-size: 1.125rem; margin-bottom: 8px;" class="uppercase">Loading Ad Video</h3>
+            <p style="color: #94a3b8; font-size:12px; margin-bottom: 16px;">Do not close the video to claim your reward.</p>
+            <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 my-4" id="adTimer">5</div>
+            <p style="font-size: 10px; color: #64748b;">Simulating Ad Network...</p>
+        </div>
+    </div>
+
+    <!-- CANVAS FLOATING PARTICLES LOGIC -->
+    <script>
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resize() { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        for(let i = 0; i < 80; i++) {
+            particles.push({ 
+                x: Math.random() * window.innerWidth, 
+                y: Math.random() * window.innerHeight, 
+                size: Math.random() * 2, 
+                speedX: (Math.random() - 0.5) * 0.5, 
+                speedY: (Math.random() - 0.5) * 0.5 
+            });
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+            particles.forEach(p => {
+                p.x += p.speedX; 
+                p.y += p.speedY;
+                if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+                ctx.beginPath(); 
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); 
+                ctx.fill();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+
+    <script>
+        // FIREBASE CONFIGURATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyDTjEyjZsz9s3UqqvgddRbW7NmKn_artsM",
+            authDomain: "extron-33a52.firebaseapp.com",
+            projectId: "extron-33a52",
+            storageBucket: "extron-33a52.firebasestorage.app",
+            messagingSenderId: "887807272793",
+            appId: "1:887807272793:web:24dd160ae31728b157ce48",
+            measurementId: "G-5ST9PZ7H8D"
+        };
+
+        // ADMIN UID
+        const ADMIN_UID = "VBRqwLdning7srpgKNATJTW9PuW2"; 
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const provider = new firebase.auth.GoogleAuthProvider();
+
+        const loginPage = document.getElementById('login-page');
+        const dashboardPage = document.getElementById('dashboard-page');
+        const loader = document.getElementById('loader');
+
+        let userCompletedTasks = [];
+        let currentTasksSnap = null; 
+        let activeIntervals = {};   
+        let referralsUnsubscribe = null;
+
+        // Baseline for live referral check
+        let previousReferralCount = null;
+
+        // SPIN WHEEL GLOBAL VARIABLES
+        let currentRotation = 0;
+        let spinState = {
+            lastResetDate: "",
+            freeSpinsUsed: 0,
+            adSpinsUsed: 0
+        };
+
+        const spinSlices = [
+            { id: 0, name: "5 EXT", reward: 5, category: "Common", chance: 35 },
+            { id: 1, name: "10 EXT", reward: 10, category: "Normal", chance: 25 },
+            { id: 2, name: "15 EXT", reward: 15, category: "Medium", chance: 15 },
+            { id: 3, name: "20 EXT", reward: 20, category: "Rare", chance: 10 },
+            { id: 4, name: "25 EXT (Jackpot)", reward: 25, category: "Very Rare", chance: 5 },
+            { id: 5, name: "Better Luck Next Time", reward: 0, category: "No Reward", chance: 7 },
+            { id: 6, name: "Free Spin Again", reward: 0, category: "Bonus", chance: 3 }
+        ];
+
+        // PROFESSIONAL POPUP HELPERS (SWEETALERT2)
+        function showToast(message, icon = 'success') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: '#0f172a', // Dark theme slate-900 background
+                color: '#ffffff',
+                iconColor: icon === 'success' ? '#10b981' : (icon === 'error' ? '#ef4444' : '#f59e0b'),
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: icon,
+                title: message
+            });
+        }
+
+        function showRewardToast(type, amount) {
+            let message = "";
+            if (type === 'check-in') {
+                message = `Daily Check-In Successful! +${amount} EXT credited`;
+            } else if (type === 'task') {
+                message = `Task Completed Successfully! +${amount} EXT credited`;
+            } else if (type === 'referral') {
+                message = `Friend Invited Successfully! +${amount} EXT credited`;
+            }
+            showToast(message, 'success');
+        }
+
+        // AUTH STATE LISTENER
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                try {
+                    await checkUserEntry(user);
+                } catch (e) {
+                    console.error("Database user entry setup failed: ", e);
+                }
+
+                loginPage.classList.add('hidden');
+                dashboardPage.classList.remove('hidden');
+                document.getElementById('display-name').innerText = user.displayName;
+                
+                const adminBtn = document.getElementById('admin-toggle-btn');
+                if(user.uid === ADMIN_UID && adminBtn) {
+                    adminBtn.classList.remove('hidden');
+                }
+
+                const currentUrl = window.location.origin + window.location.pathname;
+                document.getElementById('ref-link').innerText = `${currentUrl}?ref=${user.uid}`;
+                
+                // Initialize Spin state for this logged in user
+                initSpinLimits(user.uid);
+
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    try {
+                        if (doc.exists) {
+                            const data = doc.data();
+
+                            // LIVE REFERRAL CHECK (Triggers if the user is currently on the screen)
+                            const currentRefCount = data.referralCount || 0;
+                            if (previousReferralCount !== null && currentRefCount > previousReferralCount) {
+                                showRewardToast('referral', 50); // Live referral notification
+                            }
+                            previousReferralCount = currentRefCount;
+
+                            document.getElementById('ext-balance').innerText = data.ext_balance || 0;
+                            document.getElementById('ref-count').innerText = data.referralCount || 0;
+                            userCompletedTasks = data.completedTasks || [];
+                            
+                            renderDailyCheckIn(data);
+
+                            if (currentTasksSnap) {
+                                loadUserTasks(currentTasksSnap);
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Rendering user snapshot failed: ", err);
+                    }
+                }, error => {
+                    console.error("Firestore user snapshot subscription error: ", error);
+                });
+
+                // QUERY UPDATED FOR CHRONOLOGICAL DESCENDING ORDER (NEWEST FIRST)
+                db.collection('tasks').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                    try {
+                        currentTasksSnap = snap; 
+                        loadUserTasks(snap); 
+                        if(user.uid === ADMIN_UID) {
+                            updateAdminTaskList(snap);
+                        }
+                    } catch (err) {
+                        console.error("Rendering tasks failed: ", err);
+                    }
+                }, error => {
+                    console.error("Firestore tasks snapshot subscription error: ", error);
+                });
+
+                // REAL-TIME LISTENER FOR REFERRED USERS LIST (MATCHING TASKS STYLE & FIFO ORDER)
+                referralsUnsubscribe = db.collection('users')
+                    .where('invitedBy', '==', user.uid)
+                    .onSnapshot(snap => {
+                        const referredListContainer = document.getElementById('referred-users-list');
+                        if (!referredListContainer) return;
+
+                        if (snap.empty) {
+                            referredListContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No referrals yet.</p>`;
+                            return;
+                        }
+
+                        let referredUsers = [];
+                        snap.forEach(doc => {
+                            const data = doc.data();
+                            let createdAtDate;
+                            if (data.createdAt) {
+                                if (typeof data.createdAt.toDate === 'function') {
+                                    createdAtDate = data.createdAt.toDate();
+                                } else {
+                                    createdAtDate = new Date(data.createdAt);
+                                }
+                            } else {
+                                createdAtDate = new Date(); // Fallback for local latency
+                            }
+
+                            referredUsers.push({
+                                id: doc.id,
+                                name: data.name || "Anonymous User",
+                                createdAt: createdAtDate
+                            });
+                        });
+
+                        // Chronological sorting: 1st join is at the top (ascending order)
+                        referredUsers.sort((a, b) => a.createdAt - b.createdAt);
+
+                        referredListContainer.innerHTML = "";
+                        referredUsers.forEach((refUser) => {
+                            const formattedDate = refUser.createdAt.getTime() > (Date.now() - 60000) 
+                                ? "Just joined" 
+                                : refUser.createdAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                            // Rendering exactly matching the professional task-row design
+                            referredListContainer.innerHTML += `
+                                <div class="task-row">
+                                    <div class="task-details">
+                                        <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${refUser.name}</p>
+                                        <p class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-extrabold text-[10px] mt-1.5 italic tracking-widest">${formattedDate.toUpperCase()}</p>
+                                    </div>
+                                    <div class="task-action">
+                                        <button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2.5 rounded-full text-[10px] font-bold tracking-wider cursor-default">Claimed ✓</button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }, error => {
+                        console.error("Firestore referrals fetch failed: ", error);
+                    });
+
+            } else {
+                loginPage.classList.remove('hidden');
+                dashboardPage.classList.add('hidden');
+                if (referralsUnsubscribe) {
+                    referralsUnsubscribe();
+                    referralsUnsubscribe = null;
+                }
+            }
+        });
+
+        // USER REGISTRATION WITH REFERRED BONUS FOR BOTH (SECURE DEVICE LOCK PRESERVED)
+        async function checkUserEntry(user) {
+            const urlParams = new URLSearchParams(window.location.search);
+            let referredBy = urlParams.get('ref');
+            if (referredBy && !/^[A-Za-z0-9]{20,40}$/.test(referredBy)) referredBy = null;
+            const userRef = db.collection('users').doc(user.uid);
+            const doc = await userRef.get();
+
+            if (!doc.exists) {
+                // Device Check Key
+                const deviceKey = `ext_device_reg`;
+                const hasRegisteredOnDevice = localStorage.getItem(deviceKey);
+
+                // Referral valid only if referrer account really exists
+                let isLegitReferral = false;
+                if (referredBy && referredBy !== user.uid && !hasRegisteredOnDevice) {
+                    try {
+                        const refDoc = await db.collection('users').doc(referredBy).get();
+                        isLegitReferral = refDoc.exists;
+                    } catch (e) {
+                        isLegitReferral = false;
+                    }
+                }
+
+                // If referral is valid, starting balance is 50, otherwise 0
+                const initialBalance = isLegitReferral ? 50 : 0;
+
+                // Atomic: new user + referrer bonus succeed or fail together
+                const batch = db.batch();
+                batch.set(userRef, {
+                    name: user.displayName,
+                    email: user.email,
+                    ext_balance: initialBalance, 
+                    completedTasks: [],
+                    referralCount: 0,
+                    invitedBy: referredBy || null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    isDeviceValid: !hasRegisteredOnDevice, 
+                    lastCheckInDay: 0,
+                    checkInStreak: 0
+                });
+                if (isLegitReferral) {
+                    batch.update(db.collection('users').doc(referredBy), {
+                        ext_balance: firebase.firestore.FieldValue.increment(50),
+                        referralCount: firebase.firestore.FieldValue.increment(1)
+                    });
+                }
+                await batch.commit();
+
+                // Set browser memory key
+                localStorage.setItem(deviceKey, 'true');
+            }
+        }
+
+        // --- DYNAMIC DAILY CHECK-IN CARD RENDER ---
+        function renderDailyCheckIn(data) {
+            const container = document.getElementById('check-in-card');
+            if (!container) return;
+
+            const currentEpochDay = Math.floor(Date.now() / 86400000);
+            let streak = data.checkInStreak || 0;
+            let lastDay = data.lastCheckInDay || 0;
+
+            const alreadyCheckedInToday = (currentEpochDay === lastDay);
+            const isStreakBroken = (lastDay > 0 && currentEpochDay > lastDay + 1);
+            
+            if (isStreakBroken && !alreadyCheckedInToday) {
+                streak = 0; 
+            }
+
+            const rewards = [10, 15, 20, 25, 30, 40, 50];
+            let circlesHtml = "";
+
+            for (let i = 0; i < 7; i++) {
+                let circleClass = "check-circle-locked";
+                let circleContent = "";
+
+                if (alreadyCheckedInToday) {
+                    if (i < streak) {
+                        circleClass = "check-circle-done";
+                        circleContent = `
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 14px; height: 14px;">
+                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                            </svg>`;
+                    } else {
+                        circleClass = "check-circle-locked";
+                        circleContent = `${i + 1}`;
+                    }
+                } else {
+                    if (i < streak) {
+                        circleClass = "check-circle-done";
+                        circleContent = `
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width: 14px; height: 14px;">
+                                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                            </svg>`;
+                    } else if (i === streak) {
+                        circleClass = "check-circle-active";
+                        circleContent = `${i + 1}`;
+                    } else {
+                        circleClass = "check-circle-locked";
+                        circleContent = `${i + 1}`;
+                    }
+                }
+
+                circlesHtml += `
+                    <div class="check-circle ${circleClass}">
+                        ${circleContent}
+                        <span class="day-reward-label">+${rewards[i]}</span>
+                    </div>`;
+            }
+
+            let buttonHtml = "";
+            if (alreadyCheckedInToday) {
+                buttonHtml = `
+                    <button disabled style="width: 100% !important; background: rgba(30, 41, 59, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; color: #64748b !important; padding: 13px !important; border-radius: 50px !important; font-size: 11px !important; font-weight: bold !important; cursor: not-allowed !important; letter-spacing: 0.05em; text-transform: uppercase;">
+                        Checked in for today
+                    </button>`;
+            } else {
+                buttonHtml = `
+                    <button id="claim-btn" onclick="claimDailyCheckIn()" class="gradient-btn" style="width: 100% !important; padding: 13px !important; border-radius: 50px !important; font-size: 11px !important; font-weight: bold !important; cursor: pointer !important; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2) !important; letter-spacing: 0.05em; text-transform: uppercase;">
+                        Claim Day ${streak + 1} Reward
+                    </button>`;
+            }
+
+            container.innerHTML = `
+                <div class="check-in-title">Daily Check-in</div>
+                <div class="circles-row">${circlesHtml}</div>
+                <div style="margin-top: 25px !important;">${buttonHtml}</div>`;
+        }
+
+        // DAILY CHECK-IN WITH ADBLOCK SECURITY & AUTOMATIC PAYOUT
+        async function claimDailyCheckIn() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const claimBtn = document.getElementById('claim-btn');
+            if (claimBtn) {
+                claimBtn.disabled = true;
+                claimBtn.innerText = "Processing...";
+            }
+
+            showLoader(true);
+            try {
+                const userRef = db.collection('users').doc(user.uid);
+                const userDoc = await userRef.get();
+                if (!userDoc.exists) return;
+
+                const data = userDoc.data();
+                const currentEpochDay = Math.floor(Date.now() / 86400000);
+                let streak = data.checkInStreak || 0;
+                let lastDay = data.lastCheckInDay || 0;
+
+                if (currentEpochDay === lastDay) {
+                    showToast("You have already checked in today!", "warning");
+                    if (claimBtn) claimBtn.innerText = "Checked in for today";
+                    showLoader(false);
+                    return;
+                }
+
+                showLoader(false);
+
+                // Dynamically load Adsterra JavaScript with Error Handling
+                const adScript = document.createElement('script');
+                adScript.src = "https://pl30169353.effectivecpmnetwork.com/09/0b/5a/090b5ad8ee5d2c00eb69e74776d15961.js";
+                
+                let isAdBlocked = false;
+                adScript.onerror = () => {
+                    isAdBlocked = true;
+                };
+
+                document.body.appendChild(adScript);
+
+                if (claimBtn) claimBtn.innerText = "Ad Loading...";
+
+                // Background Timer (5 seconds) to award balance
+                setTimeout(async () => {
+                    if (isAdBlocked) {
+                        showToast("Ad blocked! Please disable AdBlocker to claim rewards.", "error");
+                        if (claimBtn) {
+                            claimBtn.disabled = false;
+                            claimBtn.innerText = "Claim Day Reward";
+                        }
+                        return;
+                    }
+
+                    showLoader(true);
+                    try {
+                        let newStreak = streak;
+                        const isStreakBroken = (lastDay > 0 && currentEpochDay > lastDay + 1);
+
+                        if (isStreakBroken || streak >= 7) {
+                            newStreak = 1; 
+                        } else {
+                            newStreak = streak + 1; 
+                        }
+
+                        const rewards = [10, 15, 20, 25, 30, 40, 50];
+                        const rewardAmount = rewards[newStreak - 1];
+
+                        await userRef.update({
+                            ext_balance: firebase.firestore.FieldValue.increment(rewardAmount),
+                            lastCheckInDay: currentEpochDay,
+                            checkInStreak: newStreak
+                        });
+
+                        if (claimBtn) {
+                            claimBtn.disabled = true;
+                            claimBtn.innerText = "Checked in for today";
+                            claimBtn.style.background = "rgba(30, 41, 59, 0.4)";
+                            claimBtn.style.cursor = "not-allowed";
+                            claimBtn.style.boxShadow = "none";
+                        }
+
+                        showRewardToast('check-in', rewardAmount);
+                    } catch (writeError) {
+                        showToast("Failed to claim reward: " + writeError.message, "error");
+                    } finally {
+                        showLoader(false);
+                    }
+                }, 5000); 
+
+            } catch (e) {
+                showToast("Check-in failed: " + e.message, "error");
+                showLoader(false);
+                if (claimBtn) {
+                    claimBtn.disabled = false;
+                    claimBtn.innerText = "Claim Day Reward";
+                }
+            }
+        }
+
+        // LOAD TASKS
+        function loadUserTasks(snap) {
+            const container = document.getElementById('tasks-list');
+            if (!snap || !container) return;
+            container.innerHTML = "";
+            
+            snap.forEach(doc => {
+                const task = doc.data();
+                const taskId = doc.id;
+                const isDone = userCompletedTasks.includes(taskId);
+                
+                let actionBtn = "";
+                if (isDone) {
+                    actionBtn = `<button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2.5 rounded-full text-[10px] font-bold tracking-wider cursor-default">Claimed ✓</button>`;
+                } else {
+                    const timerKey = `timer_${auth.currentUser?.uid || ''}_${taskId}`;
+                    const savedEndTime = localStorage.getItem(timerKey);
+                    
+                    if (savedEndTime) {
+                        const remaining = Math.ceil((savedEndTime - Date.now()) / 1000);
+                        if (remaining > 0) {
+                            actionBtn = `<button class="bg-slate-800/80 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-[10px] font-bold cursor-wait">Wait ${remaining}s</button>`;
+                            setTimeout(() => {
+                                runTimer(taskId, remaining);
+                            }, 50);
+                        } else {
+                            actionBtn = `<button onclick="claimTask('${taskId}')" class="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 px-6 py-2.5 rounded-full text-[10px] font-extrabold animate-bounce shadow-lg shadow-emerald-500/20 tracking-wider">Claim Now</button>`;
+                        }
+                    } else {
+                        actionBtn = `<button id="btn-${taskId}" onclick="startTask('${taskId}', '${task.target_url}')" class="gradient-btn text-white px-6 py-2.5 rounded-full text-[10px] font-bold active:scale-95 transition-all shadow-lg shadow-blue-500/10 tracking-wider">Start</button>`;
+                    }
+                }
+
+                container.innerHTML += `
+                    <div class="task-row">
+                        <div class="task-details">
+                            <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${task.task_name}</p>
+                            <p class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-extrabold text-[10px] mt-1.5 italic tracking-widest">+${task.reward} EXT</p>
+                        </div>
+                        <div id="container-${taskId}" class="task-action">${actionBtn}</div>
+                    </div>`;
+            });
+        }
+
+        // START TIMER
+        function startTask(taskId, link) {
+            window.open(link, '_blank');
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const duration = 30; 
+            const endTime = Date.now() + (duration * 1000);
+            
+            const timerKey = `timer_${user.uid}_${taskId}`;
+            localStorage.setItem(timerKey, endTime);
+
+            runTimer(taskId, duration);
+        }
+
+        // TIMER COUNTER (RUN SECURELY)
+        function runTimer(taskId, timeLeft) {
+            const btnContainer = document.getElementById(`container-${taskId}`);
+            if (!btnContainer) return;
+
+            if (activeIntervals[taskId]) {
+                clearInterval(activeIntervals[taskId]);
+            }
+
+            activeIntervals[taskId] = setInterval(() => {
+                const currentContainer = document.getElementById(`container-${taskId}`);
+                if (currentContainer) {
+                    currentContainer.innerHTML = `<button class="bg-slate-800/80 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-[10px] font-bold cursor-wait">Wait ${timeLeft}s</button>`;
+                }
+                timeLeft--;
+
+                if (timeLeft < 0) {
+                    clearInterval(activeIntervals[taskId]); // FIXED memory leak bug
+                    delete activeIntervals[taskId];
+                    if (currentContainer) {
+                        currentContainer.innerHTML = `<button onclick="claimTask('${taskId}')" class="bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 px-6 py-2.5 rounded-full text-[10px] font-extrabold animate-bounce shadow-lg shadow-emerald-500/20 tracking-wider">Claim Now</button>`;
+                    }
+                }
+            }, 1000);
+        }
+
+        // CLAIM REWARD FOR TASK
+        async function claimTask(taskId) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            if (userCompletedTasks.includes(taskId)) {
+                showToast("You have already completed this task!", "warning");
+                return;
+            }
+
+            const timerKey = `timer_${user.uid}_${taskId}`;
+            const savedEndTime = localStorage.getItem(timerKey);
+            if (!savedEndTime || Date.now() < savedEndTime - 2000) { 
+                showToast("Please wait for the full duration before claiming.", "warning");
+                return;
+            }
+
+            try {
+                showLoader(true);
+                localStorage.removeItem(timerKey);
+
+                const taskDoc = await db.collection('tasks').doc(taskId).get();
+                if (!taskDoc.exists) {
+                    showToast("Task not found.", "error");
+                    return;
+                }
+                const reward = taskDoc.data().reward || 0;
+
+                await db.collection('users').doc(user.uid).update({
+                    ext_balance: firebase.firestore.FieldValue.increment(Number(reward)),
+                    completedTasks: firebase.firestore.FieldValue.arrayUnion(taskId)
+                });
+
+                showRewardToast('task', reward);
+            } catch (e) {
+                showToast("Error claiming reward: " + e.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // TOGGLE ADMIN VIEW
+        function toggleAdminView() {
+            const mainView = document.getElementById('main-content-view');
+            const adminView = document.getElementById('admin-view');
+            const btn = document.getElementById('admin-toggle-btn');
+            
+            if(!mainView || !adminView || !btn) return;
+
+            if(adminView.classList.contains('hidden')) {
+                adminView.classList.remove('hidden');
+                mainView.classList.add('hidden');
+                btn.innerText = "Close Admin";
+                btn.className = "text-[10px] bg-slate-800 text-white px-4 py-2 rounded-full font-bold uppercase transition-all border border-slate-700";
+            } else {
+                adminView.classList.add('hidden');
+                mainView.classList.remove('hidden');
+                btn.innerText = "Admin";
+                btn.className = "text-[10px] bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full font-bold uppercase shadow-lg shadow-blue-500/20";
+            }
+        }
+
+        // SAVE NEW TASK (ADMIN)
+        async function saveTask() {
+            const nameInput = document.getElementById('admin-task-name');
+            const urlInput = document.getElementById('admin-task-url');
+            const rewardInput = document.getElementById('admin-task-reward');
+
+            if(!nameInput.value || !urlInput.value || !rewardInput.value) {
+                return showToast("Please fill all fields!", "warning");
+            }
+
+            const rewardNum = Number(rewardInput.value);
+            if(isNaN(rewardNum) || rewardNum <= 0) {
+                return showToast("Please enter a valid reward amount!", "warning");
+            }
+
+            showLoader(true);
+            try {
+                await db.collection('tasks').add({
+                    task_name: nameInput.value.trim(),
+                    target_url: urlInput.value.trim(),
+                    reward: rewardNum,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast("Task posted successfully!", "success");
+                nameInput.value = "";
+                urlInput.value = "";
+                rewardInput.value = "";
+            } catch (e) {
+                showToast("Failed to add task: " + e.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // UPDATE TASK LIST (ADMIN)
+        function updateAdminTaskList(snap) {
+            const list = document.getElementById('admin-tasks-list');
+            if(!list) return;
+            list.innerHTML = "";
+            snap.forEach(doc => {
+                const task = doc.data();
+                list.innerHTML += `
+                <div style="display: flex !important; flex-direction: row !important; justify-content: space-between !important; align-items: center !important; gap: 15px !important; background: rgba(15, 23, 42, 0.45) !important; border: 1px solid rgba(59, 130, 246, 0.2) !important; backdrop-filter: blur(8px) !important; padding: 15px !important; border-radius: 1.2rem !important; margin-bottom: 10px !important; width: 100% !important;">
+                    <div style="flex: 1 !important; min-width: 0 !important; text-align: left !important; padding-right: 12px !important;">
+                        <p class="font-bold text-slate-200 text-xs break-words leading-tight">${task.task_name}</p>
+                        <p class="text-[9px] text-blue-400 font-mono mt-1">${task.reward} EXT</p>
+                    </div>
+                    <button onclick="deleteTask('${doc.id}')" class="bg-red-500/15 hover:bg-red-500 border border-red-500/25 hover:border-transparent text-red-400 hover:text-white px-4 py-2 rounded-full text-[10px] font-bold transition-all shrink-0">Delete</button>
+                </div>`;
+            });
+        }
+
+        // DELETE TASK (ADMIN)
+        async function deleteTask(id) {
+            if(confirm("Are you sure you want to delete this task?")) {
+                showLoader(true);
+                try {
+                    await db.collection('tasks').doc(id).delete();
+                } catch (e) {
+                    showToast("Delete failed: " + e.message, "error");
+                } finally {
+                    showLoader(false);
+                }
+            }
+        }
+
+        // TAB NAVIGATION UTILS
+        function showTab(tab) {
+            const sections = { tasks: 'tasks-section', spin: 'spin-section', wallet: 'wallet-section', refer: 'refer-section' };
+            const buttons = { tasks: 'tab-tasks-btn', spin: 'tab-spin-btn', wallet: 'tab-wallet-btn', refer: 'tab-refer-btn' };
+
+            const balanceCard = document.getElementById('balance-card'); 
+            const checkInCard = document.getElementById('check-in-card'); 
+
+            // Safe fallback resets
+            for (const key in sections) {
+                const sec = document.getElementById(sections[key]);
+                const btn = document.getElementById(buttons[key]);
+                if (sec) sec.classList.add('hidden');
+                if (btn) btn.className = "tab-menu-btn tab-btn-inactive";
+            }
+
+            const activeSec = document.getElementById(sections[tab] || sections.refer);
+            const activeBtn = document.getElementById(buttons[tab] || buttons.refer);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeBtn) activeBtn.className = "tab-menu-btn tab-btn-active";
+
+            if (tab === 'tasks') {
+                if (balanceCard) balanceCard.classList.remove('hidden'); 
+                if (checkInCard) checkInCard.classList.remove('hidden'); 
+            } else if (tab === 'spin' || tab === 'wallet') {
+                if (balanceCard) balanceCard.classList.remove('hidden'); 
+                if (checkInCard) checkInCard.classList.add('hidden'); 
+            } else {
+                if (balanceCard) balanceCard.classList.add('hidden'); 
+                if (checkInCard) checkInCard.classList.add('hidden'); 
+            }
+
+            if (tab !== 'wallet') closeQrScanner();
+        }
+
+        // COPY REFERRAL LINK
+        function copyRef() {
+            const link = document.getElementById('ref-link').innerText;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast("Referral link copied!", "success");
+            });
+        }
+
+        // LOGIN
+        async function login() {
+            showLoader(true);
+            try {
+                await auth.signInWithPopup(provider);
+            } catch (e) {
+                showToast("Login failed: " + e.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        }
+
+        // LOGOUT WITH PREMIUM DARK SWEETALERT2 MODAL
+        function logout() {
+            Swal.fire({
+                title: 'Logout from Extron?',
+                text: 'Are you sure you want to sign out of your account?',
+                icon: 'warning',
+                iconColor: '#f87171',
+                background: '#090f23',
+                color: '#ffffff',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Logout',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+                    actions: 'gap-4', // Adds a clean 16px gap between both buttons
+                    confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10 cursor-pointer',
+                    cancelButton: 'bg-slate-800 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all'
+                },
+                buttonsStyling: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    for (let key in activeIntervals) {
+                        clearInterval(activeIntervals[key]);
+                    }
+                    activeIntervals = {};
+                    auth.signOut();
+                }
+            });
+        }
+
+        // SHOW/HIDE LOADER
+        function showLoader(status) {
+            if(status) {
+                loader.classList.remove('hidden');
+            } else {
+                loader.classList.add('hidden');
+            }
+        }
+
+        // --- DAILY SPIN WHEEL STATE MANAGEMENT & ANIMATION LOGIC ---
+        function initSpinLimits(uid) {
+            const saved = localStorage.getItem(`spinState_${uid}`);
+            if (saved) {
+                spinState = JSON.parse(saved);
+            } else {
+                spinState = {
+                    lastResetDate: "",
+                    freeSpinsUsed: 0,
+                    adSpinsUsed: 0
+                };
+            }
+            checkSpinDailyReset(uid);
+            updateSpinUI();
+            
+            // Start UTC global countdown timer
+            setInterval(updateResetCountdown, 1000);
+        }
+
+        function checkSpinDailyReset(uid) {
+            const todayUTC = getUTCTodayString();
+            if (spinState.lastResetDate !== todayUTC) {
+                spinState.lastResetDate = todayUTC;
+                spinState.freeSpinsUsed = 0;
+                spinState.adSpinsUsed = 0;
+                saveSpinState(uid);
+            }
+        }
+
+        function saveSpinState(uid) {
+            localStorage.setItem(`spinState_${uid}`, JSON.stringify(spinState));
+            updateSpinUI();
+        }
+
+        function updateSpinUI() {
+            const freeBtn = document.getElementById('spin-free-btn');
+            const adBtn = document.getElementById('spin-ad-btn');
+            const freeStatus = document.getElementById('spin-free-status');
+            const adStatus = document.getElementById('spin-ad-status');
+
+            if (!freeBtn || !adBtn || !freeStatus || !adStatus) return;
+
+            // Free Spin State Controls
+            if (spinState.freeSpinsUsed < 1) {
+                freeStatus.innerText = "Available";
+                freeStatus.style.color = "#10b981"; // Emerald Green
+                freeBtn.disabled = false;
+                freeBtn.innerText = "Play Daily Free Spin";
+            } else {
+                freeStatus.innerText = "Used";
+                freeStatus.style.color = "#ef4444"; // Red
+                freeBtn.disabled = true;
+                freeBtn.innerText = "Free Spin Used Today";
+            }
+
+            // Ad Reward Spin State Controls (Maximum 2)
+            const adSpinsLeft = 2 - spinState.adSpinsUsed;
+            adStatus.innerText = `${adSpinsLeft}/2 Left`;
+
+            if (adSpinsLeft > 0) {
+                adStatus.style.color = "#60a5fa"; // Blue
+                
+                // Enabled only after daily free spin has been exhausted
+                if (spinState.freeSpinsUsed >= 1) {
+                    adBtn.disabled = false;
+                    adBtn.className = "w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10";
+                    adBtn.innerText = "Watch Video to Spin";
+                } else {
+                    adBtn.disabled = true;
+                    adBtn.className = "w-full bg-slate-800 text-slate-500 border border-slate-700/50 py-4 rounded-full text-xs font-bold cursor-not-allowed";
+                    adBtn.innerText = "Use Free Spin First";
+                }
+            } else {
+                adStatus.style.color = "#ef4444"; // Red
+                adBtn.disabled = true;
+                adBtn.className = "w-full bg-slate-800 text-slate-500 border border-slate-700/50 py-4 rounded-full text-xs font-bold cursor-not-allowed";
+                adBtn.innerText = "All Ad Spins Used Today";
+            }
+        }
+
+        function getUTCTodayString() {
+            const now = new Date();
+            const year = now.getUTCFullYear();
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function updateResetCountdown() {
+            const now = new Date();
+            const nextMidnight = new Date(Date.UTC(
+                now.getUTCFullYear(),
+                now.getUTCMonth(),
+                now.getUTCDate() + 1,
+                0, 0, 0, 0
+            ));
+            const msLeft = nextMidnight - now;
+            if (msLeft <= 0) {
+                const user = auth.currentUser;
+                if (user) checkSpinDailyReset(user.uid);
+                return;
+            }
+            const hours = Math.floor(msLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((msLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((msLeft % (1000 * 60)) / 1000);
+            
+            const timerEl = document.getElementById('spin-reset-timer');
+            if (timerEl) {
+                timerEl.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        // Action: Daily free spin run
+        function useFreeSpin() {
+            const user = auth.currentUser;
+            if (!user || spinState.freeSpinsUsed >= 1) return;
+
+            document.getElementById('spin-free-btn').disabled = true;
+            document.getElementById('spin-ad-btn').disabled = true;
+
+            spinState.freeSpinsUsed = 1;
+            saveSpinState(user.uid);
+
+            runWheelAnimation(user.uid);
+        }
+
+        // Action: Watch ad for bonus spins
+        function watchAdForSpin() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const adSpinsLeft = 2 - spinState.adSpinsUsed;
+            if (spinState.freeSpinsUsed < 1 || adSpinsLeft <= 0) return;
+
+            document.getElementById('spin-free-btn').disabled = true;
+            document.getElementById('spin-ad-btn').disabled = true;
+
+            // Trigger Mock Ad Video overlay
+            const adOverlay = document.getElementById('adOverlay');
+            const adTimer = document.getElementById('adTimer');
+            
+            if (adOverlay && adTimer) {
+                adOverlay.classList.remove('hidden');
+                let timeLeft = 5;
+                adTimer.innerText = timeLeft;
+
+                // Dynamically loading script logic (AdBlock check included)
+                const adScript = document.createElement('script');
+                adScript.src = "https://pl30169353.effectivecpmnetwork.com/09/0b/5a/090b5ad8ee5d2c00eb69e74776d15961.js";
+                
+                let isAdBlocked = false;
+                adScript.onerror = () => {
+                    isAdBlocked = true;
+                };
+                document.body.appendChild(adScript);
+
+                const adInterval = setInterval(() => {
+                    timeLeft--;
+                    adTimer.innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(adInterval);
+                        adOverlay.classList.add('hidden');
+
+                        if (isAdBlocked) {
+                            showToast("Ad blocked! Please disable AdBlocker to claim extra spins.", "error");
+                            updateSpinUI();
+                            return;
+                        }
+
+                        spinState.adSpinsUsed += 1;
+                        saveSpinState(user.uid);
+
+                        runWheelAnimation(user.uid);
+                    }
+                }, 1000);
+            }
+        }
+
+        function runWheelAnimation(uid) {
+            const wheel = document.getElementById('wheel');
+            const resultBox = document.getElementById('spin-result-box');
+            if (!wheel || !resultBox) return;
+
+            resultBox.innerHTML = "Spinning...";
+
+            const result = getSpinWeightedResult();
+            
+            const sliceWidth = 360 / 7;
+            const extraRotations = (6 + Math.floor(Math.random() * 4)) * 360; // 6 to 9 full spins
+            const targetAngle = 360 - (result.id * sliceWidth) - (sliceWidth / 2);
+
+            currentRotation += extraRotations + (targetAngle - (currentRotation % 360));
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Wait for visual wheel transition of 5 seconds
+            setTimeout(async () => {
+                resultBox.innerHTML = `You Won: <span class="gradient-text font-black">${result.name}</span>`;
+                
+                if (result.reward > 0) {
+                    // Permanently update Firestore Database balance!
+                    try {
+                        showLoader(true);
+                        const uRef = db.collection('users').doc(uid);
+                        const uSnap = await uRef.get();
+                        const ud = uSnap.data() || {};
+                        const dayNow = Math.floor(Date.now() / 86400000);
+                        const earnedBefore = (ud.spinDay === dayNow) ? (ud.spinEarned || 0) : 0;
+                        await uRef.update({
+                            ext_balance: firebase.firestore.FieldValue.increment(result.reward),
+                            spinDay: dayNow,
+                            spinEarned: earnedBefore + result.reward
+                        });
+                        showToast(`Congratulations! +${result.reward} EXT added to your balance.`, "success");
+                    } catch (e) {
+                        showToast("Firestore update failed: " + e.message, "error");
+                    } finally {
+                        showLoader(false);
+                    }
+                } else if (result.name === "Free Spin Again") {
+                    // Give user another free spin chance
+                    spinState.freeSpinsUsed = 0; 
+                    saveSpinState(uid);
+                    showToast("Bonus! You earned a free spin again.", "success");
+                } else {
+                    showToast("Better luck next time!", "warning");
+                }
+
+                updateSpinUI();
+            }, 5000);
+        }
+
+        function getSpinWeightedResult() {
+            const random = Math.random() * 100;
+            let cumulativeChance = 0;
+
+            for (const slice of spinSlices) {
+                cumulativeChance += slice.chance;
+                if (random <= cumulativeChance) {
+                    return slice;
+                }
+            }
+            return spinSlices[spinSlices.length - 1];
+        }
+    </script>
+<script>
+// ================= WALLET (EXT transfer between users) =================
+const WALLET_MIN_SEND = 1000;
+const WALLET_PREFIX = "EXT";
+let walletUnsubs = [];
+let walletTransfers = { sent: [], received: [] };
+let walletFirstLoad = { sent: true, received: true };
+let qrScanner = null;
+let walletReceiptCache = {};
+
+function walletEsc(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function walletAddressOf(uid) {
+    return WALLET_PREFIX + uid;
+}
+
+// Returns uid if address valid, else null
+function parseWalletAddress(raw) {
+    raw = (raw || "").trim();
+    if (!raw.startsWith(WALLET_PREFIX)) return null;
+    const uid = raw.slice(WALLET_PREFIX.length);
+    if (!/^[A-Za-z0-9]{20,40}$/.test(uid)) return null;
+    return uid;
+}
+
+function initWallet(user) {
+    const address = walletAddressOf(user.uid);
+    document.getElementById('wallet-address').innerText = address;
+
+    const qrBox = document.getElementById('wallet-qr');
+    qrBox.innerHTML = "";
+    if (typeof QRCode !== 'undefined') {
+        new QRCode(qrBox, { text: address, width: 160, height: 160, colorDark: "#000000", colorLight: "#ffffff" });
+    } else {
+        qrBox.innerText = "QR unavailable";
+    }
+
+    stopWalletListeners();
+    walletTransfers = { sent: [], received: [] };
+    walletFirstLoad = { sent: true, received: true };
+
+    walletUnsubs.push(db.collection('transfers').where('from', '==', user.uid).onSnapshot(snap => {
+        walletTransfers.sent = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        walletFirstLoad.sent = false;
+        renderWalletHistory(user.uid);
+    }, err => console.error("Wallet sent history error: ", err)));
+
+    walletUnsubs.push(db.collection('transfers').where('to', '==', user.uid).onSnapshot(snap => {
+        if (!walletFirstLoad.received) {
+            snap.docChanges().forEach(ch => {
+                if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) {
+                    const t = ch.doc.data();
+                    showToast(`Received ${t.amount} EXT from ${t.fromName || 'a user'}`, 'success');
+                }
+            });
+        }
+        walletTransfers.received = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        walletFirstLoad.received = false;
+        renderWalletHistory(user.uid);
+    }, err => console.error("Wallet received history error: ", err)));
+}
+
+function stopWalletListeners() {
+    walletUnsubs.forEach(u => { try { u(); } catch (e) {} });
+    walletUnsubs = [];
+}
+
+function renderWalletHistory(uid) {
+    const box = document.getElementById('wallet-history');
+    if (!box) return;
+
+    const all = [
+        ...walletTransfers.sent.map(t => ({ ...t, dir: 'sent' })),
+        ...walletTransfers.received.map(t => ({ ...t, dir: 'received' }))
+    ];
+
+    if (all.length === 0) {
+        box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>`;
+        return;
+    }
+
+    const ms = t => (t.createdAt && typeof t.createdAt.toMillis === 'function') ? t.createdAt.toMillis() : Date.now();
+    all.sort((a, b) => ms(b) - ms(a));
+    all.forEach(t => {
+        walletReceiptCache[t.id] = { id: t.id, from: t.from, to: t.to, fromName: t.fromName, toName: t.toName, amount: t.amount, ms: ms(t) };
+    });
+
+    box.innerHTML = all.slice(0, 30).map(t => {
+        const isSent = t.dir === 'sent';
+        const who = walletEsc(isSent ? (t.toName || 'User') : (t.fromName || 'User'));
+        const d = new Date(ms(t));
+        const dateTime = d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const fromAddr = walletEsc(walletAddressOf(t.from));
+        const toAddr = walletEsc(walletAddressOf(t.to));
+        const color = isSent ? '#f87171' : '#10b981';
+        const addrStyle = 'font-size: 9px; font-family: monospace; color: #60a5fa; word-break: break-all; line-height: 1.4;';
+        const labelStyle = 'font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;';
+        return `
+            <div class="task-row" onclick="showReceiptById('${walletEsc(t.id)}')" style="align-items: flex-start !important; cursor: pointer;">
+                <div class="task-details">
+                    <p style="font-size: 10px; font-weight: 900; color: ${color}; text-transform: uppercase; letter-spacing: 0.1em;">${isSent ? 'Sent' : 'Received'}</p>
+                    <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight" style="margin-top: 2px;">${isSent ? 'To' : 'From'}: ${who}</p>
+                    <p style="${labelStyle}">From Address</p>
+                    <p style="${addrStyle}">${fromAddr}${t.from === uid ? ' (You)' : ''}</p>
+                    <p style="${labelStyle}">To Address</p>
+                    <p style="${addrStyle}">${toAddr}${t.to === uid ? ' (You)' : ''}</p>
+                    <p class="text-slate-500 font-bold text-[10px] tracking-widest" style="margin-top: 8px;">${walletEsc(dateTime).toUpperCase()}</p>
+                    <p class="gradient-text" style="font-size: 9px; font-weight: bold; margin-top: 6px; letter-spacing: 0.1em;">TAP TO VIEW RECEIPT</p>
+                </div>
+                <div class="task-action">
+                    <span style="font-weight: 900; font-size: 15px; color: ${color}; white-space: nowrap;">${isSent ? '-' : '+'}${walletEsc(t.amount)} EXT</span>
+                </div>
+            </div>`;
+    }).join("");
+}
+
+function copyWalletAddress() {
+    const addr = document.getElementById('wallet-address').innerText;
+    navigator.clipboard.writeText(addr).then(() => {
+        showToast("Wallet address copied!", "success");
+    });
+}
+
+async function sendExt() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const toInput = document.getElementById('wallet-to');
+    const amountInput = document.getElementById('wallet-amount');
+    const sendBtn = document.getElementById('wallet-send-btn');
+
+    const toUid = parseWalletAddress(toInput.value);
+    if (!toUid) return showToast("Invalid wallet address!", "error");
+    if (toUid === user.uid) return showToast("You cannot send EXT to yourself!", "warning");
+
+    const amount = Number(amountInput.value);
+    if (!Number.isInteger(amount) || amount < WALLET_MIN_SEND) {
+        return showToast(`Minimum send amount is ${WALLET_MIN_SEND} EXT`, "warning");
+    }
+
+    const result = await Swal.fire({
+        title: 'Confirm Transfer',
+        html: `Send <b>${amount} EXT</b> to this address?<br><span style="font-size:10px;font-family:monospace;word-break:break-all;color:#60a5fa;">${walletEsc(toInput.value.trim())}</span>`,
+        icon: 'question',
+        iconColor: '#8b5cf6',
+        background: '#090f23',
+        color: '#ffffff',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Send',
+        cancelButtonText: 'Cancel',
+        customClass: {
+            popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+            actions: 'gap-4',
+            confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all cursor-pointer',
+            cancelButton: 'bg-slate-800 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all'
+        },
+        buttonsStyling: false
+    });
+    if (!result.isConfirmed) return;
+
+    if (sendBtn) sendBtn.disabled = true;
+    showLoader(true);
+
+    const fromRef = db.collection('users').doc(user.uid);
+    const toRef = db.collection('users').doc(toUid);
+    let toName = "User";
+    const logRef = db.collection('transfers').doc();
+
+    try {
+        await db.runTransaction(async tx => {
+            const fromDoc = await tx.get(fromRef);
+            const toDoc = await tx.get(toRef);
+            if (!fromDoc.exists) throw new Error("Your account was not found.");
+            if (!toDoc.exists) throw new Error("Receiver address not found.");
+
+            const balance = fromDoc.data().ext_balance || 0;
+            if (balance < amount) throw new Error("Insufficient balance.");
+
+            toName = toDoc.data().name || "User";
+
+            tx.update(fromRef, { ext_balance: firebase.firestore.FieldValue.increment(-amount) });
+            tx.update(toRef, { ext_balance: firebase.firestore.FieldValue.increment(amount) });
+            // History record is part of the same atomic transaction
+            tx.set(logRef, {
+                from: user.uid,
+                to: toUid,
+                fromName: user.displayName || "User",
+                toName: toName,
+                amount: amount,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+    } catch (e) {
+        showToast("Transfer failed: " + e.message, "error");
+        showLoader(false);
+        if (sendBtn) sendBtn.disabled = false;
+        return;
+    }
+
+    toInput.value = "";
+    amountInput.value = "";
+    showToast(`${amount} EXT sent to ${toName}`, "success");
+    showLoader(false);
+    if (sendBtn) sendBtn.disabled = false;
+    showReceipt({ id: logRef.id, from: user.uid, to: toUid, fromName: user.displayName || "User", toName: toName, amount: amount, ms: Date.now() });
+}
+
+// ---- Receipt ----
+function showReceiptById(id) {
+    const t = walletReceiptCache[id];
+    if (t) showReceipt(t);
+}
+
+function showReceipt(t) {
+    const me = auth.currentUser ? auth.currentUser.uid : '';
+    const dt = new Date(t.ms).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const title = (t.to === me) ? 'Payment Received' : 'Transfer Successful';
+    const labelStyle = 'font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;';
+    const row = (label, html) => `
+        <div style="padding: 12px 0; border-bottom: 1px dashed #1e293b;">
+            <p style="${labelStyle}">${label}</p>
+            <div style="margin-top: 4px;">${html}</div>
+        </div>`;
+    const party = (name, uid) => `
+        <p style="font-size: 13px; font-weight: bold; color: #e2e8f0;">${walletEsc(name || 'User')}${uid === me ? ' (You)' : ''}</p>
+        <p style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; line-height: 1.4; margin-top: 2px;">${walletEsc(walletAddressOf(uid))}</p>`;
+
+    document.getElementById('receipt-card').innerHTML = `
+        <div style="background: linear-gradient(135deg, #0c1328, #070b18); border: 1px solid rgba(139,92,246,0.35); border-radius: 1.8rem; padding: 24px; box-shadow: 0 15px 35px -10px rgba(59,130,246,0.3);">
+            <div style="text-align: center;">
+                <span class="header-logo">EXTRON</span>
+                <div style="width: 56px; height: 56px; margin: 16px auto 10px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#10b981" style="width: 28px; height: 28px;"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>
+                </div>
+                <p style="font-size: 14px; font-weight: 900; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.1em;">${title}</p>
+                <p class="gradient-text" style="font-size: 2.2rem; font-weight: 900; margin-top: 6px;">${walletEsc(t.amount)} EXT</p>
+            </div>
+            <div style="margin-top: 14px;">
+                ${row('From', party(t.fromName, t.from))}
+                ${row('To', party(t.toName, t.to))}
+                ${row('Date & Time', `<p style="font-size: 12px; font-weight: bold; color: #e2e8f0;">${walletEsc(dt)}</p>`)}
+                ${row('Transaction ID', `<p style="font-size: 10px; font-family: monospace; color: #e2e8f0; word-break: break-all;">${walletEsc(t.id)}</p>`)}
+                ${row('Status', `<span style="display: inline-block; font-size: 10px; font-weight: 900; color: #10b981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); padding: 4px 12px; border-radius: 50px; letter-spacing: 0.1em;">SUCCESSFUL</span>`)}
+            </div>
+        </div>`;
+    document.getElementById('receiptOverlay').classList.remove('hidden');
+}
+
+function closeReceipt() {
+    document.getElementById('receiptOverlay').classList.add('hidden');
+}
+
+// ---- QR scanner ----
+function openQrScanner() {
+    if (typeof Html5Qrcode === 'undefined') {
+        return showToast("Scanner not loaded. Check your internet.", "error");
+    }
+    const overlay = document.getElementById('qrOverlay');
+    overlay.classList.remove('hidden');
+
+    qrScanner = new Html5Qrcode("qr-reader");
+    qrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 220, height: 220 } },
+        text => {
+            if (!parseWalletAddress(text)) {
+                showToast("Not a valid Extron wallet QR", "error");
+                return;
+            }
+            document.getElementById('wallet-to').value = text.trim();
+            closeQrScanner();
+            showToast("Address scanned!", "success");
+        },
+        () => {}
+    ).catch(err => {
+        showToast("Camera access failed. Allow camera permission.", "error");
+        closeQrScanner();
+    });
+}
+
+async function closeQrScanner() {
+    const overlay = document.getElementById('qrOverlay');
+    if (overlay) overlay.classList.add('hidden');
+    if (qrScanner) {
+        const sc = qrScanner;
+        qrScanner = null;
+        try { await sc.stop(); } catch (e) {}
+        try { sc.clear(); } catch (e) {}
+    }
+}
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        initWallet(user);
+    } else {
+        stopWalletListeners();
+        closeQrScanner();
+    }
+});
+</script>
+<script>
+// Block long-press / right-click menu on UI (inputs excluded)
+document.addEventListener('contextmenu', function (e) {
+    if (!e.target.closest('input, textarea')) e.preventDefault();
+});
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js")
+      .then(() => console.log("Service Worker Registered"))
+      .catch(err => console.log(err));
+  });
+}
+</script>
+</body>
+</html>
