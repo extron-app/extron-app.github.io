@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#090f23">
+<meta name="theme-color" content="#EEEBFF">
 <link rel="apple-touch-icon" href="icon-192.png">  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -58,16 +58,7 @@
         .animate-in { 
             animation: fadeIn 1.5s ease-in-out forwards; 
         }
-        @keyframes fadeIn { 
-            from { 
-                opacity: 0; 
-                transform: translateY(20px); 
-            } 
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
-            } 
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Centered login setup container */
         .login-container { 
@@ -516,9 +507,78 @@
         img, svg, canvas {
             -webkit-user-drag: none;
         }
+
+        /* ===== LAVENDER LIGHT THEME - step 1 (global, tasks, check-in, tabs, inputs) ===== */
+        body { background: #EEEBFF !important; color: #1E1B4B !important; }
+        .login-container p { color: #6B6890 !important; }
+        .glass-card { background: #FFFFFF !important; border: 1px solid #DDD6FE !important; box-shadow: 0 4px 14px -6px rgba(99,102,241,0.18) !important; }
+        .glass-card:hover { border-color: #C4B5FD !important; }
+        .header-nav { border-bottom: 1px solid #DDD6FE !important; }
+        .username-badge { color: #4F46E5 !important; background: #E0E7FF !important; border: 1px solid #C7D2FE !important; }
+        .logout-badge-btn { color: #DC2626 !important; background: #FEE2E2 !important; border: 1px solid #FECACA !important; }
+        .balance-card-box { background: #FFFFFF !important; border: 1px solid #DDD6FE !important; box-shadow: 0 10px 25px -10px rgba(99,102,241,0.3) !important; }
+        .balance-card-title { color: #6B6890 !important; }
+        .balance-card-currency { color: #7C3AED !important; }
+        .check-in-box { background: #FFFFFF !important; border: 1px solid #DDD6FE !important; box-shadow: 0 6px 18px -8px rgba(99,102,241,0.2) !important; }
+        .check-in-title { color: #1E1B4B !important; }
+        .check-circle-done { background: #D1FAE5 !important; border: 1.5px solid #10B981 !important; color: #047857 !important; }
+        .check-circle-active { background: #EDE9FE !important; border: 1.5px solid #8B5CF6 !important; color: #6D28D9 !important; box-shadow: 0 0 10px rgba(139,92,246,0.35) !important; }
+        .check-circle-locked { background: #F1EFFF !important; border: 1.5px solid #D4CCF5 !important; color: #8B86AD !important; }
+        .day-reward-label { color: #6B6890 !important; }
+        .tabs-menu { background: #E2DCFF !important; border: 1px solid #D4CCF5 !important; }
+        .tab-btn-inactive { color: #6B6890 !important; }
+        .section-header-title { color: #1E1B4B !important; }
+        .task-row { background: #FFFFFF !important; border: 1px solid #DDD6FE !important; box-shadow: 0 4px 12px -6px rgba(99,102,241,0.2) !important; }
+        .task-row:hover { border-color: #C4B5FD !important; }
+        .glass-input { background: #FFFFFF !important; border: 1px solid #C4B5FD !important; color: #1E1B4B !important; }
+        .glass-input::placeholder { color: #8B86AD; }
+        .glass-input:focus { border-color: #8B5CF6 !important; box-shadow: 0 0 0 3px rgba(139,92,246,0.15) !important; }
+        /* Tailwind utility classes used in JS-rendered rows and buttons */
+        .text-slate-200, .text-slate-300 { color: #1E1B4B !important; }
+        .text-slate-400, .text-slate-500 { color: #6B6890 !important; }
+        .bg-slate-800, .bg-slate-800\/80 { background-color: #E2DCFF !important; }
+        .border-slate-700, .border-slate-700\/50 { border-color: #D4CCF5 !important; }
+        .wheel { background-color: #EDE9FE !important; box-shadow: 0 0 16px rgba(139,92,246,0.35) !important; }
+        .loader-dark, #loader { background-color: rgba(238,235,255,0.9) !important; }
+
+        /* --- APP OPEN SPLASH --- */
+        #app-splash { position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #EEEBFF 55%, #DCD5FF 100%); transition: opacity .5s ease, visibility .5s ease; }
+        #app-splash.out { opacity: 0; visibility: hidden; }
+        #app-splash .sp-logo { width: 112px; height: 112px; border-radius: 50%; box-shadow: 0 12px 36px rgba(99,102,241,.35); animation: spPop .7s cubic-bezier(.2,.9,.3,1.2) both, spFloat 2.6s ease-in-out .7s infinite; }
+        #app-splash .sp-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        #app-splash .sp-name { margin-top: 22px; font-size: 30px; font-weight: 900; letter-spacing: 1px; color: #5B4FE0 !important; -webkit-text-fill-color: #5B4FE0; text-shadow: 0 2px 10px rgba(99,102,241,.25); animation: spUp .6s ease .25s both; }
+        #app-splash .sp-tag { margin-top: 4px; font-size: 13px; font-weight: 500; color: #6B6890; letter-spacing: .5px; animation: spUp .6s ease .4s both; }
+        #app-splash .sp-dots { margin-top: 28px; display: flex; gap: 7px; animation: spUp .6s ease .55s both; }
+        #app-splash .sp-dots span { width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; animation: spDot 1s ease-in-out infinite; }
+        #app-splash .sp-dots span:nth-child(2) { animation-delay: .15s; }
+        #app-splash .sp-dots span:nth-child(3) { animation-delay: .3s; }
+        @keyframes spPop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes spFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes spUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spDot { 0%,100% { opacity: .25; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
     </style>
 </head>
 <body class="animate-in">
+<div id="app-splash">
+    <div class="sp-logo"><img src="data:image/webp;base64,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" alt=""></div>
+    <div class="sp-name">Extron</div>
+    <div class="sp-tag">Tasks &amp; Rewards</div>
+    <div class="sp-dots"><span></span><span></span><span></span></div>
+</div>
+<script>
+(function(){
+    var t0 = Date.now();
+    function hide(){
+        var el = document.getElementById('app-splash');
+        if(!el) return;
+        el.classList.add('out');
+        setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 600);
+    }
+    function go(){ var w = 1600 - (Date.now() - t0); setTimeout(hide, w > 0 ? w : 0); }
+    if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+    setTimeout(hide, 4000);
+})();
+</script>
 
     <!-- CANVAS PARTICLES BACKGROUND -->
     <canvas id="bgCanvas"></canvas>
@@ -592,17 +652,17 @@
                             <span class="section-header-pill"></span> Lucky Wheel
                         </h3>
                         <!-- Daily spin stats panel inside a nested glass layout -->
-                        <div style="background: #090f23; padding: 15px; border-radius: 1.5rem; border: 1px solid #1e293b; margin-bottom: 20px; font-size: 12px; line-height: 1.8;">
+                        <div style="background: #F5F2FF; padding: 15px; border-radius: 1.5rem; border: 1px solid #DDD6FE; margin-bottom: 20px; font-size: 12px; line-height: 1.8;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <span style="color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Free Spin Status:</span>
+                                <span style="color: #6B6890; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Free Spin Status:</span>
                                 <span id="spin-free-status" class="gradient-text" style="font-weight: 900;">Loading...</span>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                                <span style="color: #94a3b8; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Extra Ad Spins:</span>
+                                <span style="color: #6B6890; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Extra Ad Spins:</span>
                                 <span id="spin-ad-status" class="gradient-text" style="font-weight: 900;">Loading...</span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #1e293b; margin-top: 8px; padding-top: 8px;">
-                                <span style="color: #64748b; font-size: 11px; font-weight: bold; text-transform: uppercase;">Global Reset In:</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #DDD6FE; margin-top: 8px; padding-top: 8px;">
+                                <span style="color: #6B6890; font-size: 11px; font-weight: bold; text-transform: uppercase;">Global Reset In:</span>
                                 <span id="spin-reset-timer" style="color: #ef4444; font-family: monospace; font-weight: bold; font-size: 12px;">--:--:--</span>
                             </div>
                         </div>
@@ -612,13 +672,13 @@
                             <div class="pointer"></div>
                             <div class="center-pin"></div>
                             <div class="wheel" id="wheel">
-                                <div class="slice" style="--i:0; --color: rgba(30, 41, 59, 0.75);"><span>5 EXT</span></div>
-                                <div class="slice" style="--i:1; --color: rgba(59, 130, 246, 0.75);"><span>10 EXT</span></div>
-                                <div class="slice" style="--i:2; --color: rgba(124, 58, 237, 0.75);"><span>15 EXT</span></div>
-                                <div class="slice" style="--i:3; --color: rgba(139, 92, 246, 0.75);"><span>20 EXT</span></div>
-                                <div class="slice" style="--i:4; --color: rgba(245, 158, 11, 0.75);"><span>25 EXT</span></div>
-                                <div class="slice" style="--i:5; --color: rgba(239, 68, 68, 0.75);"><span>Try Again</span></div>
-                                <div class="slice" style="--i:6; --color: rgba(16, 185, 129, 0.75);"><span>Free Spin</span></div>
+                                <div class="slice" style="--i:0; --color: rgba(99, 102, 241, 0.9);"><span>5 EXT</span></div>
+                                <div class="slice" style="--i:1; --color: rgba(59, 130, 246, 0.92);"><span>10 EXT</span></div>
+                                <div class="slice" style="--i:2; --color: rgba(124, 58, 237, 0.92);"><span>15 EXT</span></div>
+                                <div class="slice" style="--i:3; --color: rgba(139, 92, 246, 0.92);"><span>20 EXT</span></div>
+                                <div class="slice" style="--i:4; --color: rgba(245, 158, 11, 0.92);"><span>25 EXT</span></div>
+                                <div class="slice" style="--i:5; --color: rgba(239, 68, 68, 0.92);"><span>Try Again</span></div>
+                                <div class="slice" style="--i:6; --color: rgba(16, 185, 129, 0.92);"><span>Free Spin</span></div>
                             </div>
                         </div>
 
@@ -635,55 +695,41 @@
 
                 <!-- WALLET SECTION -->
                 <div id="wallet-section" class="hidden">
-                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
-                        <h3 class="section-header-title" style="margin-bottom: 15px;">
-                            <span class="section-header-pill"></span> My Wallet
-                        </h3>
-                        <div style="background: #090f23; padding: 20px; border-radius: 1.5rem; border: 1px solid #1e293b; text-align: center;">
-                            <div id="wallet-qr" style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 14px;"></div>
-                            <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #64748b; margin-bottom: 8px; letter-spacing: 0.05em;">Your wallet address</p>
-                            <p id="wallet-address" style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; margin-bottom: 16px; background: #020617; padding: 12px; border-radius: 1rem; border: 1px solid #1e293b; font-weight: bold;">Loading...</p>
-                            <button onclick="copyWalletAddress()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Address</button>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
-                        <h3 class="section-header-title" style="margin-bottom: 15px;">
+                    <div class="glass-card p-5 rounded-[2rem] shadow-sm mb-4">
+                        <h3 class="section-header-title" style="margin-bottom: 12px;">
                             <span class="section-header-pill"></span> Send EXT
                         </h3>
-                        <div style="display: flex; flex-direction: column; gap: 12px;">
-                            <input id="wallet-to" type="text" placeholder="Paste receiver address" class="w-full p-4 rounded-full glass-input text-sm" autocomplete="off">
-                            <button onclick="openQrScanner()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all">Scan QR Code</button>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <div style="position: relative;">
+                                <input id="wallet-to" type="text" placeholder="Paste receiver address" class="w-full p-4 rounded-full glass-input text-sm" style="padding-right: 56px;" autocomplete="off">
+                                <button type="button" onclick="openQrScanner()" aria-label="Scan QR code" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: none; background: linear-gradient(to right, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                                </button>
+                            </div>
                             <input id="wallet-amount" type="number" inputmode="numeric" placeholder="Amount (min 1000 EXT)" class="w-full p-4 rounded-full glass-input text-sm">
-                            <p style="font-size: 10px; color: #64748b; text-align: center;">Minimum send amount: 1000 EXT</p>
                             <button id="wallet-send-btn" onclick="sendExt()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">SEND EXT</button>
                         </div>
                     </div>
-
-                    <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
-                        <h3 class="section-header-title" style="margin-bottom: 15px;">
-                            <span class="section-header-pill"></span> Transfer History
-                        </h3>
-                        <div id="wallet-history" class="flex flex-col gap-1">
-                            <p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>
-                        </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button onclick="openWalletSheet('receive')" class="flex-1 bg-slate-800 text-slate-300 border border-slate-700/50 py-4 rounded-full text-xs font-bold active:scale-95 transition-all">RECEIVE</button>
+                        <button onclick="openWalletSheet('history')" class="flex-1 bg-slate-800 text-slate-300 border border-slate-700/50 py-4 rounded-full text-xs font-bold active:scale-95 transition-all">HISTORY</button>
                     </div>
                 </div>
 
                 <!-- REFERRAL SECTION -->
                 <div id="refer-section" class="hidden">
                     <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
-                        <h3 style="font-weight: bold; color: #e2e8f0; font-size: 1.125rem; margin-bottom: 4px;">Invite Friends</h3>
-                        <p style="font-size: 0.875rem; color: #94a3b8; margin-bottom: 20px;">Earn <span class="gradient-text" style="font-weight: bold;">50 EXT</span> for every join!</p>
+                        <h3 style="font-weight: bold; color: #1E1B4B; font-size: 1.125rem; margin-bottom: 4px;">Invite Friends</h3>
+                        <p style="font-size: 0.875rem; color: #6B6890; margin-bottom: 20px;">Earn <span class="gradient-text" style="font-weight: bold;">50 EXT</span> for every join!</p>
                         
-                        <div style="background: #090f23; padding: 20px; border-radius: 1.5rem; border: 1px solid #1e293b; margin-bottom: 20px;">
-                            <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #64748b; margin-bottom: 8px; letter-spacing: 0.05em;">Copy your link</p>
-                            <p id="ref-link" style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; margin-bottom: 16px; background: #020617; padding: 12px; border-radius: 1rem; border: 1px solid #1e293b; font-weight: bold;">Generating...</p>
+                        <div style="background: #F5F2FF; padding: 20px; border-radius: 1.5rem; border: 1px solid #DDD6FE; margin-bottom: 20px;">
+                            <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6B6890; margin-bottom: 8px; letter-spacing: 0.05em;">Copy your link</p>
+                            <p id="ref-link" style="font-size: 10px; font-family: monospace; color: #4F46E5; word-break: break-all; margin-bottom: 16px; background: #FFFFFF; padding: 12px; border-radius: 1rem; border: 1px solid #DDD6FE; font-weight: bold;">Generating...</p>
                             <button onclick="copyRef()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Referral Link</button>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">
-                            <span style="font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Invited Users:</span>
+                            <span style="font-size: 12px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em;">Invited Users:</span>
                             <span id="ref-count" class="gradient-text" style="font-size: 1.25rem; font-weight: 900;">0</span>
                         </div>
                     </div>
@@ -705,13 +751,13 @@
     </div>
 
     <!-- ADMIN PANEL VIEW -->
-    <div id="admin-view" class="max-w-md mx-auto p-5 hidden">
+    <div id="admin-view" class="max-w-md mx-auto p-5 hidden relative z-10">
         <h2 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
             <span style="width: 8px; height: 32px; background: linear-gradient(to bottom, #3b82f6, #8b5cf6); border-radius: 9999px;"></span> Control Panel
         </h2>
         
         <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-8">
-            <h3 style="font-weight: bold; margin-bottom: 16px; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Create New Task</h3>
+            <h3 style="font-weight: bold; margin-bottom: 16px; color: #6B6890; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Create New Task</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
                 <input id="admin-task-name" type="text" placeholder="Task Name (e.g. Subscribe Channel)" class="w-full p-4 rounded-full glass-input text-sm">
                 <input id="admin-task-url" type="text" placeholder="Target Link (https://...)" class="w-full p-4 rounded-full glass-input text-sm">
@@ -720,40 +766,63 @@
             </div>
         </div>
 
-        <h3 style="font-weight: bold; margin-bottom: 16px; color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Manage Active Tasks</h3>
+        <h3 style="font-weight: bold; margin-bottom: 16px; color: #6B6890; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Manage Active Tasks</h3>
         <div id="admin-tasks-list">
             <!-- Active tasks will list here -->
         </div>
     </div>
 
+    <!-- WALLET SHEETS -->
+    <div id="receiveSheet" class="hidden" style="position: fixed; inset: 0; z-index: 90; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <h3 class="section-header-title" style="margin-bottom: 14px;"><span class="section-header-pill"></span> Receive EXT</h3>
+            <div style="background: #F5F2FF; padding: 20px; border-radius: 1.5rem; border: 1px solid #DDD6FE; text-align: center;">
+                <div id="wallet-qr" style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block; margin-bottom: 14px;"></div>
+                <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6B6890; margin-bottom: 8px; letter-spacing: 0.05em;">Your wallet address</p>
+                <p id="wallet-address" style="font-size: 10px; font-family: monospace; color: #4F46E5; word-break: break-all; margin-bottom: 16px; background: #FFFFFF; padding: 12px; border-radius: 1rem; border: 1px solid #DDD6FE; font-weight: bold;">Loading...</p>
+                <button onclick="copyWalletAddress()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Address</button>
+            </div>
+            <button onclick="closeWalletSheet('receive')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
+        </div>
+    </div>
+    <div id="historySheet" class="hidden" style="position: fixed; inset: 0; z-index: 90; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <h3 class="section-header-title" style="margin-bottom: 14px;"><span class="section-header-pill"></span> Transfer History</h3>
+            <div id="wallet-history" class="flex flex-col gap-1">
+                <p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>
+            </div>
+            <button onclick="closeWalletSheet('history')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
+        </div>
+    </div>
+
     <!-- TRANSACTION RECEIPT OVERLAY -->
-    <div id="receiptOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); overflow-y: auto; padding: 24px 16px;">
+    <div id="receiptOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
         <div style="max-width: 380px; margin: 0 auto;">
             <div id="receipt-card"></div>
-            <p style="text-align: center; font-size: 10px; color: #64748b; margin: 14px 0;">Take a screenshot to share this receipt as proof.</p>
+            <p style="text-align: center; font-size: 10px; color: #6B6890; margin: 14px 0;">Take a screenshot to share this receipt as proof.</p>
             <button onclick="closeReceipt()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all">Close</button>
         </div>
     </div>
 
     <!-- QR SCANNER OVERLAY -->
-    <div id="qrOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
-        <p style="font-weight: bold; color: #e2e8f0; font-size: 14px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.1em;">Scan Wallet QR</p>
+    <div id="qrOverlay" class="hidden" style="position: fixed; inset: 0; z-index: 100; background: rgba(238,235,255,0.98); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+        <p style="font-weight: bold; color: #1E1B4B; font-size: 14px; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.1em;">Scan Wallet QR</p>
         <div id="qr-reader" style="width: 100%; max-width: 320px; border-radius: 1.5rem; overflow: hidden; background: #000;"></div>
         <button onclick="closeQrScanner()" class="bg-slate-800 text-slate-300 border border-slate-700/50 px-8 py-3 rounded-full text-xs font-bold" style="margin-top: 20px;">Cancel</button>
     </div>
 
     <!-- GLOBAL LOADER -->
-    <div id="loader" class="fixed inset-0 bg-[#020617]/90 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
+    <div id="loader" class="fixed inset-0 bg-[#EEEBFF]/90 backdrop-blur-sm flex items-center justify-center z-[100] hidden">
         <div class="w-10 h-10 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin"></div>
     </div>
 
     <!-- SIMULATED REWARDED AD OVERLAY -->
-    <div id="adOverlay" class="fixed inset-0 bg-[#020617]/95 backdrop-blur-md flex items-center justify-center z-[100] hidden">
+    <div id="adOverlay" class="fixed inset-0 bg-[#EEEBFF]/95 backdrop-blur-md flex items-center justify-center z-[100] hidden">
         <div class="glass-card p-8 rounded-[2.5rem] border border-[rgba(139,92,246,0.35)] max-w-xs w-full text-center">
             <h3 style="font-weight: bold; color: #8b5cf6; font-size: 1.125rem; margin-bottom: 8px;" class="uppercase">Loading Ad Video</h3>
-            <p style="color: #94a3b8; font-size:12px; margin-bottom: 16px;">Do not close the video to claim your reward.</p>
+            <p style="color: #6B6890; font-size:12px; margin-bottom: 16px;">Do not close the video to claim your reward.</p>
             <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 my-4" id="adTimer">5</div>
-            <p style="font-size: 10px; color: #64748b;">Simulating Ad Network...</p>
+            <p style="font-size: 10px; color: #6B6890;">Simulating Ad Network...</p>
         </div>
     </div>
 
@@ -782,7 +851,7 @@
 
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(59, 130, 246, 0.3)';
+            ctx.fillStyle = 'rgba(124, 58, 237, 0.22)';
             particles.forEach(p => {
                 p.x += p.speedX; 
                 p.y += p.speedY;
@@ -856,8 +925,8 @@
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-                background: '#0f172a', // Dark theme slate-900 background
-                color: '#ffffff',
+                background: '#FFFFFF', // Dark theme slate-900 background
+                color: '#1E1B4B',
                 iconColor: icon === 'success' ? '#10b981' : (icon === 'error' ? '#ef4444' : '#f59e0b'),
                 didOpen: (toast) => {
                     toast.addEventListener('mouseenter', Swal.stopTimer)
@@ -1134,7 +1203,7 @@
             let buttonHtml = "";
             if (alreadyCheckedInToday) {
                 buttonHtml = `
-                    <button disabled style="width: 100% !important; background: rgba(30, 41, 59, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; color: #64748b !important; padding: 13px !important; border-radius: 50px !important; font-size: 11px !important; font-weight: bold !important; cursor: not-allowed !important; letter-spacing: 0.05em; text-transform: uppercase;">
+                    <button disabled style="width: 100% !important; background: rgba(30, 41, 59, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; color: #6B6890 !important; padding: 13px !important; border-radius: 50px !important; font-size: 11px !important; font-weight: bold !important; cursor: not-allowed !important; letter-spacing: 0.05em; text-transform: uppercase;">
                         Checked in for today
                     </button>`;
             } else {
@@ -1382,17 +1451,22 @@
             const mainView = document.getElementById('main-content-view');
             const adminView = document.getElementById('admin-view');
             const btn = document.getElementById('admin-toggle-btn');
+            const dash = document.getElementById('dashboard-page');
             
             if(!mainView || !adminView || !btn) return;
 
             if(adminView.classList.contains('hidden')) {
                 adminView.classList.remove('hidden');
                 mainView.classList.add('hidden');
+                if(dash) dash.classList.remove('min-h-screen');
+                window.scrollTo(0, 0);
                 btn.innerText = "Close Admin";
-                btn.className = "text-[10px] bg-slate-800 text-white px-4 py-2 rounded-full font-bold uppercase transition-all border border-slate-700";
+                btn.className = "text-[10px] bg-slate-800 text-slate-300 px-4 py-2 rounded-full font-bold uppercase transition-all border border-slate-700";
             } else {
                 adminView.classList.add('hidden');
                 mainView.classList.remove('hidden');
+                if(dash) dash.classList.add('min-h-screen');
+                window.scrollTo(0, 0);
                 btn.innerText = "Admin";
                 btn.className = "text-[10px] bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full font-bold uppercase shadow-lg shadow-blue-500/20";
             }
@@ -1497,7 +1571,7 @@
                 if (checkInCard) checkInCard.classList.add('hidden'); 
             }
 
-            if (tab !== 'wallet') closeQrScanner();
+            if (tab !== 'wallet') { closeQrScanner(); closeWalletSheet('receive'); closeWalletSheet('history'); }
         }
 
         // COPY REFERRAL LINK
@@ -1527,8 +1601,8 @@
                 text: 'Are you sure you want to sign out of your account?',
                 icon: 'warning',
                 iconColor: '#f87171',
-                background: '#090f23',
-                color: '#ffffff',
+                background: '#FFFFFF',
+                color: '#1E1B4B',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, Logout',
                 cancelButtonText: 'Cancel',
@@ -1619,7 +1693,7 @@
             adStatus.innerText = `${adSpinsLeft}/2 Left`;
 
             if (adSpinsLeft > 0) {
-                adStatus.style.color = "#60a5fa"; // Blue
+                adStatus.style.color = "#4F46E5"; // Blue
                 
                 // Enabled only after daily free spin has been exhausted
                 if (spinState.freeSpinsUsed >= 1) {
@@ -1899,9 +1973,9 @@ function renderWalletHistory(uid) {
         const dateTime = d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
         const fromAddr = walletEsc(walletAddressOf(t.from));
         const toAddr = walletEsc(walletAddressOf(t.to));
-        const color = isSent ? '#f87171' : '#10b981';
-        const addrStyle = 'font-size: 9px; font-family: monospace; color: #60a5fa; word-break: break-all; line-height: 1.4;';
-        const labelStyle = 'font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;';
+        const color = isSent ? '#DC2626' : '#059669';
+        const addrStyle = 'font-size: 9px; font-family: monospace; color: #4F46E5; word-break: break-all; line-height: 1.4;';
+        const labelStyle = 'font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;';
         return `
             <div class="task-row" onclick="showReceiptById('${walletEsc(t.id)}')" style="align-items: flex-start !important; cursor: pointer;">
                 <div class="task-details">
@@ -1947,11 +2021,11 @@ async function sendExt() {
 
     const result = await Swal.fire({
         title: 'Confirm Transfer',
-        html: `Send <b>${amount} EXT</b> to this address?<br><span style="font-size:10px;font-family:monospace;word-break:break-all;color:#60a5fa;">${walletEsc(toInput.value.trim())}</span>`,
+        html: `Send <b>${amount} EXT</b> to this address?<br><span style="font-size:10px;font-family:monospace;word-break:break-all;color:#4F46E5;">${walletEsc(toInput.value.trim())}</span>`,
         icon: 'question',
         iconColor: '#8b5cf6',
-        background: '#090f23',
-        color: '#ffffff',
+        background: '#FFFFFF',
+        color: '#1E1B4B',
         showCancelButton: true,
         confirmButtonText: 'Yes, Send',
         cancelButtonText: 'Cancel',
@@ -2012,6 +2086,18 @@ async function sendExt() {
     showReceipt({ id: logRef.id, from: user.uid, to: toUid, fromName: user.displayName || "User", toName: toName, amount: amount, ms: Date.now() });
 }
 
+// ---- Wallet sheets ----
+function openWalletSheet(name) {
+    const el = document.getElementById(name + 'Sheet');
+    if (!el) return;
+    el.classList.remove('hidden');
+    el.scrollTop = 0;
+}
+function closeWalletSheet(name) {
+    const el = document.getElementById(name + 'Sheet');
+    if (el) el.classList.add('hidden');
+}
+
 // ---- Receipt ----
 function showReceiptById(id) {
     const t = walletReceiptCache[id];
@@ -2021,36 +2107,37 @@ function showReceiptById(id) {
 function showReceipt(t) {
     const me = auth.currentUser ? auth.currentUser.uid : '';
     const dt = new Date(t.ms).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const title = (t.to === me) ? 'Payment Received' : 'Transfer Successful';
-    const labelStyle = 'font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em;';
+    const title = (t.to === me) ? 'Received Successfully' : 'Sent Successfully';
+    const labelStyle = 'font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em;';
     const row = (label, html) => `
-        <div style="padding: 12px 0; border-bottom: 1px dashed #1e293b;">
+        <div style="padding: 12px 0; border-bottom: 1px dashed #DDD6FE;">
             <p style="${labelStyle}">${label}</p>
             <div style="margin-top: 4px;">${html}</div>
         </div>`;
     const party = (name, uid) => `
-        <p style="font-size: 13px; font-weight: bold; color: #e2e8f0;">${walletEsc(name || 'User')}${uid === me ? ' (You)' : ''}</p>
-        <p style="font-size: 10px; font-family: monospace; color: #60a5fa; word-break: break-all; line-height: 1.4; margin-top: 2px;">${walletEsc(walletAddressOf(uid))}</p>`;
+        <p style="font-size: 13px; font-weight: bold; color: #1E1B4B;">${walletEsc(name || 'User')}${uid === me ? ' (You)' : ''}</p>
+        <p style="font-size: 10px; font-family: monospace; color: #4F46E5; word-break: break-all; line-height: 1.4; margin-top: 2px;">${walletEsc(walletAddressOf(uid))}</p>`;
 
     document.getElementById('receipt-card').innerHTML = `
-        <div style="background: linear-gradient(135deg, #0c1328, #070b18); border: 1px solid rgba(139,92,246,0.35); border-radius: 1.8rem; padding: 24px; box-shadow: 0 15px 35px -10px rgba(59,130,246,0.3);">
+        <div style="background: linear-gradient(135deg, #FFFFFF, #F5F2FF); border: 1px solid rgba(139,92,246,0.35); border-radius: 1.8rem; padding: 24px; box-shadow: 0 15px 35px -10px rgba(59,130,246,0.3);">
             <div style="text-align: center;">
                 <span class="header-logo">EXTRON</span>
                 <div style="width: 56px; height: 56px; margin: 16px auto 10px; border-radius: 50%; background: rgba(16,185,129,0.15); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center;">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#10b981" style="width: 28px; height: 28px;"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" /></svg>
                 </div>
-                <p style="font-size: 14px; font-weight: 900; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.1em;">${title}</p>
+                <p style="font-size: 14px; font-weight: 900; color: #1E1B4B; text-transform: uppercase; letter-spacing: 0.1em;">${title}</p>
                 <p class="gradient-text" style="font-size: 2.2rem; font-weight: 900; margin-top: 6px;">${walletEsc(t.amount)} EXT</p>
             </div>
             <div style="margin-top: 14px;">
                 ${row('From', party(t.fromName, t.from))}
                 ${row('To', party(t.toName, t.to))}
-                ${row('Date & Time', `<p style="font-size: 12px; font-weight: bold; color: #e2e8f0;">${walletEsc(dt)}</p>`)}
-                ${row('Transaction ID', `<p style="font-size: 10px; font-family: monospace; color: #e2e8f0; word-break: break-all;">${walletEsc(t.id)}</p>`)}
+                ${row('Date & Time', `<p style="font-size: 12px; font-weight: bold; color: #1E1B4B;">${walletEsc(dt)}</p>`)}
+                ${row('Transaction ID', `<p style="font-size: 10px; font-family: monospace; color: #1E1B4B; word-break: break-all;">${walletEsc(t.id)}</p>`)}
                 ${row('Status', `<span style="display: inline-block; font-size: 10px; font-weight: 900; color: #10b981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); padding: 4px 12px; border-radius: 50px; letter-spacing: 0.1em;">SUCCESSFUL</span>`)}
             </div>
         </div>`;
     document.getElementById('receiptOverlay').classList.remove('hidden');
+    document.getElementById('receiptOverlay').scrollTop = 0;
 }
 
 function closeReceipt() {
