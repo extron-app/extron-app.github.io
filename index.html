@@ -545,6 +545,31 @@
         #balance-card .balance-card-currency { font-size: 0.95rem !important; }
         #balance-card .balance-card-number { font-size: 1.6rem !important; line-height: 1.2 !important; }
 
+        /* --- INFO (FAQ + ROADMAP) --- */
+        .info-btn { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #C4B5FD; background: #FFFFFF; color: #6D28D9; font-size: 12px; font-weight: 900; font-style: italic; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+        .info-btn:active { transform: scale(0.92); }
+        .info-seg { display: flex; gap: 4px; background: #E2DCFF; border: 1px solid #D4CCF5; padding: 4px; border-radius: 50px; margin-bottom: 16px; }
+        .info-seg button { flex: 1; padding: 10px 4px; border-radius: 50px; border: none; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .info-seg .on { background: linear-gradient(to right, #3b82f6, #8b5cf6); color: #fff; }
+        .info-seg .off { background: transparent; color: #6B6890; }
+        .faq-item { background: #FFFFFF; border: 1px solid #DDD6FE; border-radius: 1.2rem; margin-bottom: 10px; box-shadow: 0 4px 12px -8px rgba(99,102,241,0.25); overflow: hidden; }
+        .faq-item summary { list-style: none; cursor: pointer; padding: 14px 44px 14px 16px; font-size: 13px; font-weight: bold; color: #1E1B4B; position: relative; line-height: 1.4; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '+'; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 18px; font-weight: 900; color: #7C3AED; }
+        .faq-item[open] summary::after { content: '\2212'; }
+        .faq-item p { padding: 0 16px 14px 16px; font-size: 12px; color: #6B6890; line-height: 1.6; }
+        .road-item { display: flex; gap: 12px; margin-bottom: 14px; }
+        .road-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+        .road-card { flex: 1; background: #FFFFFF; border: 1px solid #DDD6FE; border-radius: 1.2rem; padding: 14px 16px; box-shadow: 0 4px 12px -8px rgba(99,102,241,0.25); }
+        .road-card h4 { font-size: 13px; font-weight: 900; color: #1E1B4B; margin-bottom: 4px; }
+        .road-card p { font-size: 12px; color: #6B6890; line-height: 1.6; }
+        .bp-row { margin-bottom: 14px; }
+        .bp-head { display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; color: #1E1B4B; margin-bottom: 5px; }
+        .bp-bar { height: 8px; border-radius: 50px; background: #EDE9FE; overflow: hidden; }
+        .bp-bar > div { height: 100%; border-radius: 50px; background: linear-gradient(to right, #3b82f6, #8b5cf6); }
+        .bp-sub { font-size: 10px !important; color: #6B6890; margin-top: 4px; }
+        .road-chip { display: inline-block; font-size: 9px; font-weight: 900; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border-radius: 50px; margin-bottom: 6px; }
+
         /* --- APP OPEN SPLASH --- */
         #app-splash { position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #EEEBFF 55%, #DCD5FF 100%); transition: opacity .5s ease, visibility .5s ease; }
         #app-splash.out { opacity: 0; visibility: hidden; }
@@ -610,7 +635,10 @@
         <div class="dashboard-container">
             
             <header class="header-nav">
-                <span class="header-logo">EXTRON</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="header-logo">EXTRON</span>
+                    <button type="button" onclick="openInfoSheet()" aria-label="Info" class="info-btn">i</button>
+                </div>
                 <div class="header-user-actions">
                     <button id="admin-toggle-btn" onclick="toggleAdminView()" class="text-[10px] bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full font-bold uppercase shadow-lg shadow-blue-500/20 hidden">Admin</button>
                     <span id="display-name" class="username-badge">...</span>
@@ -830,6 +858,84 @@
                 <p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>
             </div>
             <button onclick="closeWalletSheet('history')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
+        </div>
+    </div>
+
+    <!-- INFO SHEET: FAQ + ROADMAP -->
+    <div id="infoSheet" class="hidden" style="position: fixed; inset: 0; z-index: 90; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <h3 class="section-header-title" style="margin-bottom: 14px;"><span class="section-header-pill"></span> About Extron</h3>
+            <div class="info-seg">
+                <button id="info-tab-faq" class="on" onclick="setInfoTab('faq')">FAQ</button>
+                <button id="info-tab-road" class="off" onclick="setInfoTab('road')">ROADMAP</button>
+                <button id="info-tab-blue" class="off" onclick="setInfoTab('blue')">BLUEPRINT</button>
+            </div>
+
+            <div id="info-faq">
+                <details class="faq-item"><summary>What is Extron?</summary><p>Extron is a tasks and rewards app. You earn EXT points by completing tasks, checking in daily and spinning the wheel.</p></details>
+                <details class="faq-item"><summary>What is EXT?</summary><p>EXT is an in-app point. You can use it inside Extron, for example to send to other users. It has no guaranteed value.</p></details>
+                <details class="faq-item"><summary>What is the total supply of EXT?</summary><p>The planned total supply is 1,000,000,000 EXT. See the Blueprint tab for details.</p></details>
+                <details class="faq-item"><summary>How do I earn EXT?</summary><p>Complete tasks, check in every day, spin the wheel and invite your friends.</p></details>
+                <details class="faq-item"><summary>How does daily check-in work?</summary><p>Check in once a day to keep your streak going. The longer your streak, the bigger the daily reward.</p></details>
+                <details class="faq-item"><summary>How does Spin work?</summary><p>You get a daily free spin plus bonus spins. Whatever the wheel lands on is added to your account.</p></details>
+                <details class="faq-item"><summary>How does referral work?</summary><p>Share your link with friends. When your friend completes the tasks and checks in, you earn bonus EXT and an extra spin.</p></details>
+                <details class="faq-item"><summary>How do I send EXT to another user?</summary><p>Open the Wallet tab, paste their address or scan their QR code, enter the amount and send. The minimum send amount is 1000 EXT.</p></details>
+                <details class="faq-item"><summary>Can I have more than one account?</summary><p>No. Each device can have only one Extron account.</p></details>
+            </div>
+
+            <div id="info-blue" class="hidden">
+                <div class="road-card" style="text-align: center; margin-bottom: 14px;">
+                    <p style="font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em;">Total Supply</p>
+                    <p class="gradient-text" style="font-size: 1.7rem; font-weight: 900; margin-top: 4px; line-height: 1.2;">1,000,000,000</p>
+                    <p style="font-size: 11px; font-weight: bold; color: #6D28D9; margin-top: 2px;">EXT</p>
+                </div>
+
+                <p style="font-size: 10px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 4px 8px;">Planned allocation</p>
+                <div class="road-card" style="margin-bottom: 14px;">
+                    <div class="bp-row"><div class="bp-head"><span>Community</span><span>60%</span></div><div class="bp-bar"><div style="width: 60%;"></div></div><p class="bp-sub">Rewards, tasks, spins and referrals</p></div>
+                    <div class="bp-row"><div class="bp-head"><span>Reserve</span><span>20%</span></div><div class="bp-bar"><div style="width: 20%;"></div></div><p class="bp-sub">Future plans and partnerships</p></div>
+                    <div class="bp-row"><div class="bp-head"><span>Team</span><span>10%</span></div><div class="bp-bar"><div style="width: 10%;"></div></div><p class="bp-sub">Developer team</p></div>
+                    <div class="bp-row" style="margin-bottom: 0;"><div class="bp-head"><span>Marketing and growth</span><span>10%</span></div><div class="bp-bar"><div style="width: 10%;"></div></div><p class="bp-sub">Growing the community</p></div>
+                </div>
+
+                <div class="road-card">
+                    <h4>What is EXT?</h4>
+                    <p>EXT is an in-app point earned through activity in Extron.</p>
+                    <h4 style="margin-top: 12px;">Future</h4>
+                    <p>As the community grows, EXT may be migrated to a blockchain token. If this happens, the terms will be announced in the app. Only genuine accounts (one person, one account) will be considered.</p>
+                </div>
+                <p style="text-align: center; font-size: 10px; color: #6B6890; margin-top: 10px; line-height: 1.5;">Nothing here is a promise or a guarantee of value. Numbers may be updated as the project grows.</p>
+            </div>
+
+            <div id="info-road" class="hidden">
+                <div class="road-item">
+                    <div class="road-dot" style="background: #10B981;"></div>
+                    <div class="road-card">
+                        <span class="road-chip" style="background: #D1FAE5; color: #047857;">Now</span>
+                        <h4>Live today</h4>
+                        <p>Tasks, daily check-in, spin wheel, referrals, and wallet send and receive.</p>
+                    </div>
+                </div>
+                <div class="road-item">
+                    <div class="road-dot" style="background: #8B5CF6;"></div>
+                    <div class="road-card">
+                        <span class="road-chip" style="background: #EDE9FE; color: #6D28D9;">Next</span>
+                        <h4>Coming up</h4>
+                        <p>Levels and badges, more tasks, and general improvements.</p>
+                    </div>
+                </div>
+                <div class="road-item">
+                    <div class="road-dot" style="background: #F59E0B;"></div>
+                    <div class="road-card">
+                        <span class="road-chip" style="background: #FEF3C7; color: #B45309;">Later</span>
+                        <h4>Growing together</h4>
+                        <p>Community growth and more ways to use EXT. Any future listing is only a goal, not a promise.</p>
+                    </div>
+                </div>
+                <p style="text-align: center; font-size: 10px; color: #6B6890; margin-top: 6px;">Plans may change as we grow.</p>
+            </div>
+
+            <button onclick="closeWalletSheet('info')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
         </div>
     </div>
 
@@ -2027,6 +2133,21 @@
             if (withdrawBarEl && balanceCard) withdrawBarEl.classList.toggle('hidden', balanceCard.classList.contains('hidden'));
 
             if (tab !== 'wallet') { closeQrScanner(); closeWalletSheet('receive'); closeWalletSheet('history'); }
+        }
+
+        // INFO SHEET (FAQ + ROADMAP)
+        function setInfoTab(which) {
+            if (which !== 'road' && which !== 'blue') which = 'faq';
+            ['faq', 'road', 'blue'].forEach(function (k) {
+                const pane = document.getElementById('info-' + k);
+                const btn = document.getElementById('info-tab-' + k);
+                if (pane) pane.classList.toggle('hidden', k !== which);
+                if (btn) btn.className = (k === which) ? 'on' : 'off';
+            });
+        }
+        function openInfoSheet() {
+            setInfoTab('faq');
+            openWalletSheet('info');
         }
 
         // COPY REFERRAL LINK
