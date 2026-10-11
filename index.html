@@ -541,6 +541,10 @@
         .wheel { background-color: #EDE9FE !important; box-shadow: 0 0 16px rgba(139,92,246,0.35) !important; }
         .loader-dark, #loader { background-color: rgba(238,235,255,0.9) !important; }
 
+        /* Balance card: EXT (left) + USDT (right), smaller numbers so big balances fit */
+        #balance-card .balance-card-currency { font-size: 0.95rem !important; }
+        #balance-card .balance-card-number { font-size: 1.6rem !important; line-height: 1.2 !important; }
+
         /* --- APP OPEN SPLASH --- */
         #app-splash { position: fixed; inset: 0; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 30%, #FFFFFF 0%, #EEEBFF 55%, #DCD5FF 100%); transition: opacity .5s ease, visibility .5s ease; }
         #app-splash.out { opacity: 0; visibility: hidden; }
@@ -590,7 +594,7 @@
         <div class="input-group">
             <button onclick="login()" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 auto;">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92( 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
@@ -618,10 +622,28 @@
                 
                 <div id="balance-card" class="balance-card-box" style="transform: translateY(-4px); transition: all 0.3s ease;">
                     <div class="balance-card-title">Your Balance</div>
-                    <div class="balance-card-amount-row">
+                    <div class="balance-card-amount-row" style="justify-content: space-between !important; gap: 12px !important;"><div style="display: flex; align-items: baseline; gap: 6px; min-width: 0;">
                         <span class="balance-card-currency">EXT</span>
-                        <span id="ext-balance" class="balance-card-number">0</span>
+                        <span id="ext-balance" class="balance-card-number">0</span></div><div style="display: flex; align-items: baseline; gap: 6px; flex-shrink: 0;"><span class="balance-card-currency">USDT</span><span id="usdt-balance" class="balance-card-number">0.00</span></div>
                     </div>
+                </div>
+
+                <!-- USDT WALLET (BEP20) slim bar: balance card ke neeche, check-in ke upar -->
+                <div id="usdt-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #FFFFFF; border: 1px solid #DDD6FE; border-radius: 1.2rem; padding: 10px 14px; margin-bottom: 15px; box-shadow: 0 4px 12px -8px rgba(99,102,241,0.25);">
+                    <div style="min-width: 0;">
+                        <p style="font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em;">USDT Wallet (BEP20)</p>
+                        <p id="usdt-addr-text" style="font-size: 12px; font-weight: 700; color: #6B6890; font-family: monospace; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Not bound</p>
+                    </div>
+                    <button id="usdt-bind-btn" onclick="openUsdtBind()" class="gradient-btn" style="flex-shrink: 0; padding: 8px 16px; border-radius: 50px; font-size: 10px; font-weight: bold; letter-spacing: 0.05em; cursor: pointer;">Bind</button>
+                </div>
+
+                <!-- USDT WITHDRAW slim bar: bind bar ke neeche, check-in ke upar (abhi sirf design, button disabled) -->
+                <div id="withdraw-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #FFFFFF; border: 1px solid #DDD6FE; border-radius: 1.2rem; padding: 10px 14px; margin-bottom: 15px; box-shadow: 0 4px 12px -8px rgba(99,102,241,0.25);">
+                    <div style="min-width: 0;">
+                        <p onclick="openUsdtHistory()" style="font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer;">USDT Withdraw <span class="gradient-text" style="margin-left: 6px;">History &rsaquo;</span></p>
+                        <p id="withdraw-status-text" onclick="openUsdtHistory()" style="cursor: pointer;font-size: 12px; font-weight: 700; color: #6B6890; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">No USDT to withdraw</p>
+                    </div>
+                    <button id="withdraw-btn" onclick="withdrawUsdt()" class="gradient-btn" style="flex-shrink: 0; padding: 8px 16px; border-radius: 50px; font-size: 10px; font-weight: bold; letter-spacing: 0.05em; cursor: pointer;">Withdraw</button>
                 </div>
 
                 <div id="check-in-card" class="check-in-box">
@@ -661,6 +683,10 @@
                                 <span style="color: #6B6890; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Extra Ad Spins:</span>
                                 <span id="spin-ad-status" class="gradient-text" style="font-weight: 900;">Loading...</span>
                             </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="color: #6B6890; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Referral Spins:</span>
+                                <span id="spin-ref-status" class="gradient-text" style="font-weight: 900;">0</span>
+                            </div>
                             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #DDD6FE; margin-top: 8px; padding-top: 8px;">
                                 <span style="color: #6B6890; font-size: 11px; font-weight: bold; text-transform: uppercase;">Global Reset In:</span>
                                 <span id="spin-reset-timer" style="color: #ef4444; font-family: monospace; font-weight: bold; font-size: 12px;">--:--:--</span>
@@ -678,7 +704,7 @@
                                 <div class="slice" style="--i:3; --color: rgba(139, 92, 246, 0.92);"><span>20 EXT</span></div>
                                 <div class="slice" style="--i:4; --color: rgba(245, 158, 11, 0.92);"><span>25 EXT</span></div>
                                 <div class="slice" style="--i:5; --color: rgba(239, 68, 68, 0.92);"><span>Try Again</span></div>
-                                <div class="slice" style="--i:6; --color: rgba(16, 185, 129, 0.92);"><span>Free Spin</span></div>
+                                <div class="slice" style="--i:6; --color: rgba(16, 185, 129, 0.92);"><span>1 USDT</span></div>
                             </div>
                         </div>
 
@@ -689,6 +715,8 @@
                         <div style="display: flex; flex-direction: column; gap: 12px;">
                             <button id="spin-free-btn" onclick="useFreeSpin()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Play Daily Free Spin</button>
                             <button id="spin-ad-btn" onclick="watchAdForSpin()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-4 rounded-full text-xs font-bold active:scale-95 transition-all">Watch Video to Spin</button>
+                            <button id="spin-ref-btn" onclick="useReferralSpin()" class="hidden w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Use Referral Spin</button>
+                            <button id="spin-history-btn" onclick="openSpinHistory()" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-4 rounded-full text-xs font-bold active:scale-95 transition-all">Spin History</button>
                         </div>
                     </div>
                 </div>
@@ -720,7 +748,7 @@
                 <div id="refer-section" class="hidden">
                     <div class="glass-card p-6 rounded-[2.5rem] shadow-sm mb-6">
                         <h3 style="font-weight: bold; color: #1E1B4B; font-size: 1.125rem; margin-bottom: 4px;">Invite Friends</h3>
-                        <p style="font-size: 0.875rem; color: #6B6890; margin-bottom: 20px;">Earn <span class="gradient-text" style="font-weight: bold;">50 EXT</span> for every join!</p>
+                        <p style="font-size: 0.875rem; color: #6B6890; margin-bottom: 20px;">Earn <span class="gradient-text" style="font-weight: bold;">50 EXT + 1 Spin</span> when your friend completes 3 tasks and checks in.</p>
                         
                         <div style="background: #F5F2FF; padding: 20px; border-radius: 1.5rem; border: 1px solid #DDD6FE; margin-bottom: 20px;">
                             <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6B6890; margin-bottom: 8px; letter-spacing: 0.05em;">Copy your link</p>
@@ -766,6 +794,16 @@
             </div>
         </div>
 
+        <h3 style="font-weight: bold; margin-bottom: 16px; color: #6B6890; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Withdraw Requests</h3>
+        <div id="admin-withdraw-list" style="margin-bottom: 24px;">
+            <p class="text-xs text-slate-500 text-center py-4">No pending requests.</p>
+        </div>
+
+        <h3 style="font-weight: bold; margin-bottom: 16px; color: #6B6890; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Paid Withdrawals</h3>
+        <div id="admin-paid-list" style="margin-bottom: 32px;">
+            <p class="text-xs text-slate-500 text-center py-4">No paid withdrawals yet.</p>
+        </div>
+
         <h3 style="font-weight: bold; margin-bottom: 16px; color: #6B6890; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Manage Active Tasks</h3>
         <div id="admin-tasks-list">
             <!-- Active tasks will list here -->
@@ -792,6 +830,28 @@
                 <p class="text-xs text-slate-500 text-center py-4">No transfers yet.</p>
             </div>
             <button onclick="closeWalletSheet('history')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
+        </div>
+    </div>
+
+    <!-- USDT HISTORY SHEET -->
+    <div id="usdtHistorySheet" class="hidden" style="position: fixed; inset: 0; z-index: 90; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <h3 class="section-header-title" style="margin-bottom: 14px;"><span class="section-header-pill"></span> USDT History</h3>
+            <div id="usdt-history-list" class="flex flex-col gap-1">
+                <p class="text-xs text-slate-500 text-center py-4">No USDT wins yet.</p>
+            </div>
+            <button onclick="closeWalletSheet('usdtHistory')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
+        </div>
+    </div>
+
+    <!-- SPIN HISTORY SHEET -->
+    <div id="spinHistorySheet" class="hidden" style="position: fixed; inset: 0; z-index: 90; background: rgba(238,235,255,0.98); overflow-y: auto; padding: 24px 16px;">
+        <div style="max-width: 380px; margin: 0 auto;">
+            <h3 class="section-header-title" style="margin-bottom: 14px;"><span class="section-header-pill"></span> Spin History</h3>
+            <div id="spin-history-list" class="flex flex-col gap-1">
+                <p class="text-xs text-slate-500 text-center py-4">No spins yet.</p>
+            </div>
+            <button onclick="closeWalletSheet('spinHistory')" class="w-full bg-slate-800 text-slate-300 border border-slate-700/50 py-3 rounded-full text-xs font-bold active:scale-95 transition-all" style="margin-top: 14px;">Close</button>
         </div>
     </div>
 
@@ -899,6 +959,14 @@
         // Baseline for live referral check
         let previousReferralCount = null;
 
+        // REFERRAL RULE: invited user ko itne tasks + itne alag din check-in karne hain
+        const REF_NEED_TASKS = 3;
+        const REF_NEED_CHECKINS = 1;
+        const REF_HOLD_MS = 60 * 60 * 1000; // shart poori hone ke baad itna intezar (app mein zahir nahi karna)
+        let refClaimInFlight = false;
+        let currentBonusSpins = 0;
+        let wheelSpinning = false;
+
         // SPIN WHEEL GLOBAL VARIABLES
         let currentRotation = 0;
         let spinState = {
@@ -914,8 +982,32 @@
             { id: 3, name: "20 EXT", reward: 20, category: "Rare", chance: 10 },
             { id: 4, name: "25 EXT (Jackpot)", reward: 25, category: "Very Rare", chance: 5 },
             { id: 5, name: "Better Luck Next Time", reward: 0, category: "No Reward", chance: 7 },
-            { id: 6, name: "Free Spin Again", reward: 0, category: "Bonus", chance: 3 }
+            // USDT jackpot slice: random chance 0, ye sirf har N-vi spin (global counter) par nikalta hai
+            { id: 6, name: "1 USDT", reward: 0, category: "USDT Jackpot", chance: 0, jackpot: true }
         ];
+
+        // USDT JACKPOT: har N-vi spin (sab users ki mili hui) par 1 USDT. N Firestore doc settings/usdtJackpot (field "every") se badal sakte hain
+        const USDT_EVERY_DEFAULT = 1000;
+
+        // Global spin counter ek transaction mein barhao. Fail ho (rules/network) to spin normal chalti hai, jackpot nahi
+        async function takeSpinNumber() {
+            const ref = db.collection('settings').doc('usdtJackpot');
+            let out = { spinNumber: 0, every: USDT_EVERY_DEFAULT, jackpot: false };
+            try {
+                await db.runTransaction(async tx => {
+                    const s = await tx.get(ref);
+                    const d = s.exists ? s.data() : {};
+                    const every = (Number(d.every) > 0) ? Math.floor(Number(d.every)) : USDT_EVERY_DEFAULT;
+                    const n = (Number(d.counter) || 0) + 1;
+                    tx.set(ref, { counter: n, every: every }, { merge: true });
+                    out = { spinNumber: n, every: every, jackpot: (n % every === 0) };
+                });
+            } catch (e) {
+                console.error("Spin counter failed: ", e);
+                out = { spinNumber: 0, every: USDT_EVERY_DEFAULT, jackpot: false };
+            }
+            return out;
+        }
 
         // PROFESSIONAL POPUP HELPERS (SWEETALERT2)
         function showToast(message, icon = 'success') {
@@ -947,7 +1039,7 @@
             } else if (type === 'task') {
                 message = `Task Completed Successfully! +${amount} EXT credited`;
             } else if (type === 'referral') {
-                message = `Friend Invited Successfully! +${amount} EXT credited`;
+                message = `Friend Invited Successfully! +${amount} EXT and 1 Spin credited`;
             }
             showToast(message, 'success');
         }
@@ -955,10 +1047,31 @@
         // AUTH STATE LISTENER
         auth.onAuthStateChanged(async (user) => {
             if (user) {
+                let entryOk = true;
                 try {
-                    await checkUserEntry(user);
+                    entryOk = await checkUserEntry(user);
                 } catch (e) {
                     console.error("Database user entry setup failed: ", e);
+                }
+
+                // Is device par pehle se doosra account hai: naya account nahi banega
+                if (entryOk === false) {
+                    try { await auth.signOut(); } catch (e) {}
+                    Swal.fire({
+                        title: 'Account not created',
+                        text: 'This device already has an Extron account. Please log in with your existing account.',
+                        icon: 'warning',
+                        iconColor: '#f59e0b',
+                        background: '#FFFFFF',
+                        color: '#1E1B4B',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+                            confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all cursor-pointer'
+                        },
+                        buttonsStyling: false
+                    });
+                    return;
                 }
 
                 loginPage.classList.add('hidden');
@@ -989,10 +1102,16 @@
                             previousReferralCount = currentRefCount;
 
                             document.getElementById('ext-balance').innerText = data.ext_balance || 0;
+                            updateUsdtBar(data.usdtAddress || "");
                             document.getElementById('ref-count').innerText = data.referralCount || 0;
                             userCompletedTasks = data.completedTasks || [];
-                            
+
                             renderDailyCheckIn(data);
+
+                            // Referral spins (spin tab) + delayed referral reward check
+                            currentBonusSpins = data.bonusSpins || 0;
+                            updateRefSpinUI();
+                            maybeClaimReferralReward(user.uid, data);
 
                             if (currentTasksSnap) {
                                 loadUserTasks(currentTasksSnap);
@@ -1028,6 +1147,7 @@
                         if (!referredListContainer) return;
 
                         if (snap.empty) {
+                            invitedCache = [];
                             referredListContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No referrals yet.</p>`;
                             return;
                         }
@@ -1046,12 +1166,32 @@
                                 createdAtDate = new Date(); // Fallback for local latency
                             }
 
+                            // Naye signup jin ka referral valid nahi tha (refValid === false) list mein nahi dikhte
+                            if (data.refValid === false) return;
+
+                            // Purane users (refValid field nahi) ko pehle hi instant reward mil chuka tha = Claimed
+                            const isLegacy = (data.refValid === undefined);
+                            const isClaimed = isLegacy || data.referralRewarded === true;
+
                             referredUsers.push({
                                 id: doc.id,
                                 name: data.name || "Anonymous User",
-                                createdAt: createdAtDate
+                                createdAt: createdAtDate,
+                                claimed: isClaimed,
+                                tasksDone: Math.min((data.completedTasks || []).length, REF_NEED_TASKS),
+                                checkins: Math.min(data.checkInTotal || 0, REF_NEED_CHECKINS),
+                                readyAt: refReadyMs(data)
                             });
                         });
+
+                        // Inviter ki taraf se 1 ghanta guzarne par claim ke liye cache
+                        invitedCache = referredUsers;
+                        checkInvitedForClaim();
+
+                        if (referredUsers.length === 0) {
+                            referredListContainer.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No referrals yet.</p>`;
+                            return;
+                        }
 
                         // Chronological sorting: 1st join is at the top (ascending order)
                         referredUsers.sort((a, b) => a.createdAt - b.createdAt);
@@ -1066,11 +1206,14 @@
                             referredListContainer.innerHTML += `
                                 <div class="task-row">
                                     <div class="task-details">
-                                        <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${refUser.name}</p>
+                                        <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${walletEsc(refUser.name)}</p>
                                         <p class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-extrabold text-[10px] mt-1.5 italic tracking-widest">${formattedDate.toUpperCase()}</p>
+                                        ${(refUser.claimed || (refUser.tasksDone >= REF_NEED_TASKS && refUser.checkins >= REF_NEED_CHECKINS)) ? '' : `<p class="text-slate-500 font-bold text-[10px] mt-1 tracking-wider">Tasks ${refUser.tasksDone}/${REF_NEED_TASKS} &bull; Check-in ${refUser.checkins}/${REF_NEED_CHECKINS}</p>`}
                                     </div>
                                     <div class="task-action">
-                                        <button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2.5 rounded-full text-[10px] font-bold tracking-wider cursor-default">Claimed ✓</button>
+                                        ${refUser.claimed
+                                            ? `<button class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2.5 rounded-full text-[10px] font-bold tracking-wider cursor-default">Claimed ✓</button>`
+                                            : `<button class="bg-amber-500/10 text-amber-500 border border-amber-500/30 px-6 py-2.5 rounded-full text-[10px] font-bold tracking-wider cursor-default">Pending</button>`}
                                     </div>
                                 </div>
                             `;
@@ -1089,7 +1232,68 @@
             }
         });
 
+        // ===== DEVICE LOCK helpers (web mein jitna mumkin) =====
+        // Random device ID 3 jagah save hota hai (localStorage + IndexedDB + cookie).
+        // Koi ek jagah saaf ho jaye to baaki se wapas bahal ho jata hai.
+        function extIdbOp(mode, fn) {
+            return new Promise((resolve) => {
+                try {
+                    const req = indexedDB.open('ext_dev_db', 1);
+                    req.onupgradeneeded = () => { try { req.result.createObjectStore('kv'); } catch (e) {} };
+                    req.onerror = () => resolve(null);
+                    req.onsuccess = () => {
+                        try {
+                            const dbx = req.result;
+                            const tx = dbx.transaction('kv', mode);
+                            const r = fn(tx.objectStore('kv'));
+                            tx.oncomplete = () => { dbx.close(); resolve(r && r.result !== undefined ? r.result : null); };
+                            tx.onerror = () => { dbx.close(); resolve(null); };
+                            tx.onabort = () => { dbx.close(); resolve(null); };
+                        } catch (e) { resolve(null); }
+                    };
+                } catch (e) { resolve(null); }
+            });
+        }
+        function extGetCookie(n) {
+            const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]*)'));
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+        function extSetCookie(n, v) {
+            document.cookie = n + '=' + encodeURIComponent(v) + '; max-age=315360000; path=/; SameSite=Lax; Secure';
+        }
+        async function getDeviceId() {
+            const KEY = 'ext_did';
+            const valid = v => typeof v === 'string' && /^[a-f0-9]{32}$/.test(v);
+            let a = null, c = null;
+            try { a = localStorage.getItem(KEY); } catch (e) {}
+            const b = await extIdbOp('readonly', s => s.get(KEY));
+            try { c = extGetCookie(KEY); } catch (e) {}
+            let id = [a, b, c].find(valid);
+            if (!id) {
+                const arr = new Uint8Array(16);
+                crypto.getRandomValues(arr);
+                id = Array.from(arr, x => x.toString(16).padStart(2, '0')).join('');
+            }
+            try { localStorage.setItem(KEY, id); } catch (e) {}
+            await extIdbOp('readwrite', s => s.put(id, KEY));
+            try { extSetCookie(KEY, id); } catch (e) {}
+            return id;
+        }
+        // Halka fingerprint: sirf record ke liye (block nahi karta, kyunke ek jaise phones ka match ho sakta hai)
+        function getDeviceFingerprint() {
+            try {
+                const s = [navigator.userAgent, navigator.platform, screen.width + 'x' + screen.height,
+                    window.devicePixelRatio, navigator.hardwareConcurrency, navigator.deviceMemory,
+                    navigator.maxTouchPoints, navigator.language,
+                    Intl.DateTimeFormat().resolvedOptions().timeZone].join('|');
+                let h = 5381;
+                for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+                return (h >>> 0).toString(16);
+            } catch (e) { return ''; }
+        }
+
         // USER REGISTRATION WITH REFERRED BONUS FOR BOTH (SECURE DEVICE LOCK PRESERVED)
+        // Return false = is device par pehle se doosra account hai, naya account nahi banega
         async function checkUserEntry(user) {
             const urlParams = new URLSearchParams(window.location.search);
             let referredBy = urlParams.get('ref');
@@ -1098,6 +1302,23 @@
             const doc = await userRef.get();
 
             if (!doc.exists) {
+                // DEVICE REGISTRY CHECK: is device par pehle se doosre user ka account hai to naya account nahi banega
+                let regRef = null;
+                let regExists = false;
+                try {
+                    const deviceId = await getDeviceId();
+                    regRef = db.collection('deviceRegistry').doc(deviceId);
+                    const regDoc = await regRef.get();
+                    regExists = regDoc.exists;
+                    if (regDoc.exists && regDoc.data().uid !== user.uid) {
+                        return false;
+                    }
+                } catch (e) {
+                    // Rules/network masla ho to signup rukta nahi (fail-open), registry skip
+                    console.error("Device registry check failed: ", e);
+                    regRef = null;
+                }
+
                 // Device Check Key
                 const deviceKey = `ext_device_reg`;
                 const hasRegisteredOnDevice = localStorage.getItem(deviceKey);
@@ -1128,20 +1349,139 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     isDeviceValid: !hasRegisteredOnDevice, 
                     lastCheckInDay: 0,
-                    checkInStreak: 0
+                    checkInStreak: 0,
+                    checkInTotal: 0,
+                    bonusSpins: 0,
+                    refValid: !!isLegitReferral,
+                    referralRewarded: false,
+                    deviceFp: getDeviceFingerprint()
                 });
-                if (isLegitReferral) {
-                    batch.update(db.collection('users').doc(referredBy), {
-                        ext_balance: firebase.firestore.FieldValue.increment(50),
-                        referralCount: firebase.firestore.FieldValue.increment(1)
+                if (regRef && !regExists) {
+                    batch.set(regRef, {
+                        uid: user.uid,
+                        fp: getDeviceFingerprint(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
                 }
+                // NOTE: referrer ko ab instant reward nahi milta.
+                // Reward tab milta hai jab ye user 3 tasks + 1 check-in ke 1 ghante baad (maybeClaimReferralReward).
                 await batch.commit();
 
                 // Set browser memory key
                 localStorage.setItem(deviceKey, 'true');
+            } else {
+                // Purana user: is device ka registry record bana do (agar pehle se nahi), taake yahan naya account na bane
+                try {
+                    const did = await getDeviceId();
+                    const r2 = db.collection('deviceRegistry').doc(did);
+                    const r2doc = await r2.get();
+                    if (!r2doc.exists) {
+                        await r2.set({
+                            uid: user.uid,
+                            fp: getDeviceFingerprint(),
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                } catch (e) {
+                    console.error("Device registry backfill failed: ", e);
+                }
+            }
+            return true;
+        }
+
+        // DELAYED REFERRAL REWARD:
+        // 1) invited user ke 3 tasks + 1 check-in pure hon to server time "refReadyAt" save hota hai (ek hi bar)
+        // 2) refReadyAt se REF_HOLD_MS (1 ghanta) guzarne ke baad inviter ko 50 EXT + 1 spin (ek hi bar, transaction se)
+        // Ghari phone ki nahi, Firestore server time se chalti hai. Account banane se ghanta shuru nahi hota.
+        let refReadyRequested = false;
+        let latestUserData = null;
+
+        function refReadyMs(d) {
+            return (d && d.refReadyAt && typeof d.refReadyAt.toMillis === 'function') ? d.refReadyAt.toMillis() : 0;
+        }
+
+        // Invited user ki taraf: shart poori hone par refReadyAt likho, aur 1 ghanta guzar jaye to claim karo
+        async function maybeClaimReferralReward(uid, data) {
+            latestUserData = data;
+            if (!data || !data.invitedBy || data.refValid !== true || data.referralRewarded === true) return;
+            if ((data.completedTasks || []).length < REF_NEED_TASKS) return;
+            if ((data.checkInTotal || 0) < REF_NEED_CHECKINS) return;
+
+            if (!data.refReadyAt) {
+                if (refReadyRequested) return;
+                refReadyRequested = true;
+                try {
+                    await db.collection('users').doc(uid).update({
+                        refReadyAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (e) {
+                    refReadyRequested = false;
+                    console.error("refReadyAt save failed: ", e);
+                }
+                return;
+            }
+
+            const ready = refReadyMs(data);
+            if (ready && Date.now() >= ready + REF_HOLD_MS) {
+                await claimReferralReward(uid, data.invitedBy);
             }
         }
+
+        // Transaction: invited user ka referralRewarded=true + inviter ko 50 EXT, 1 spin, referralCount+1
+        // (invited user ya inviter, jis ka app pehle khule, wohi claim kar deta hai)
+        async function claimReferralReward(invitedUid, inviterUid) {
+            if (refClaimInFlight) return;
+            refClaimInFlight = true;
+            try {
+                const invitedRef = db.collection('users').doc(invitedUid);
+                const referrerRef = db.collection('users').doc(inviterUid);
+                await db.runTransaction(async tx => {
+                    const me = await tx.get(invitedRef);
+                    if (!me.exists) return;
+                    const d = me.data();
+                    if (d.referralRewarded === true || d.refValid !== true) return;
+                    if ((d.completedTasks || []).length < REF_NEED_TASKS) return;
+                    if ((d.checkInTotal || 0) < REF_NEED_CHECKINS) return;
+                    const ready = refReadyMs(d);
+                    if (!ready || Date.now() < ready + REF_HOLD_MS) return;
+                    const referrer = await tx.get(referrerRef);
+                    tx.update(invitedRef, { referralRewarded: true });
+                    if (referrer.exists) {
+                        const credit = {
+                            ext_balance: firebase.firestore.FieldValue.increment(50),
+                            bonusSpins: firebase.firestore.FieldValue.increment(1),
+                            referralCount: firebase.firestore.FieldValue.increment(1)
+                        };
+                        // Inviter khud claim kare to rules ke liye proof: kis invited user ki wajah se
+                        const me2 = auth.currentUser;
+                        if (me2 && me2.uid === inviterUid) credit.lastRefClaimUid = invitedUid;
+                        tx.update(referrerRef, credit);
+                    }
+                });
+            } catch (e) {
+                console.error("Referral reward claim failed: ", e);
+            } finally {
+                refClaimInFlight = false;
+            }
+        }
+
+        // Inviter ki taraf: list mein jin ka 1 ghanta poora ho chuka, unka claim karo (aik waqt mein ek)
+        let invitedCache = [];
+        function checkInvitedForClaim() {
+            const me = auth.currentUser;
+            if (!me || refClaimInFlight) return;
+            const now = Date.now();
+            const due = invitedCache.find(u => !u.claimed && u.readyAt && now >= u.readyAt + REF_HOLD_MS);
+            if (due) claimReferralReward(due.id, me.uid);
+        }
+
+        // Har minute dono taraf dobara check (app khula rahe to bina refresh ke Pending se Claimed ho jaye)
+        setInterval(() => {
+            const u = auth.currentUser;
+            if (!u) return;
+            if (latestUserData) maybeClaimReferralReward(u.uid, latestUserData);
+            checkInvitedForClaim();
+        }, 60000);
 
         // --- DYNAMIC DAILY CHECK-IN CARD RENDER ---
         function renderDailyCheckIn(data) {
@@ -1291,7 +1631,8 @@
                         await userRef.update({
                             ext_balance: firebase.firestore.FieldValue.increment(rewardAmount),
                             lastCheckInDay: currentEpochDay,
-                            checkInStreak: newStreak
+                            checkInStreak: newStreak,
+                            checkInTotal: firebase.firestore.FieldValue.increment(1)
                         });
 
                         if (claimBtn) {
@@ -1539,6 +1880,115 @@
             }
         }
 
+        // ===== USDT WALLET (BEP20) BIND =====
+        const USDT_ADDR_RE = /^0x[a-fA-F0-9]{40}$/;
+        let currentUsdtAddress = "";
+
+        function maskAddr(a) {
+            return a ? (a.slice(0, 6) + '...' + a.slice(-4)) : '';
+        }
+
+        function updateUsdtBar(addr) {
+            currentUsdtAddress = addr || "";
+            const txt = document.getElementById('usdt-addr-text');
+            const btn = document.getElementById('usdt-bind-btn');
+            if (!txt || !btn) return;
+            if (currentUsdtAddress) {
+                txt.innerText = maskAddr(currentUsdtAddress);
+                txt.style.color = '#4F46E5';
+                btn.innerText = 'Change';
+            } else {
+                txt.innerText = 'Not bound';
+                txt.style.color = '#6B6890';
+                btn.innerText = 'Bind';
+            }
+        }
+
+        async function openUsdtBind() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const popupClasses = {
+                popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+                actions: 'gap-4',
+                confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all cursor-pointer',
+                cancelButton: 'bg-slate-800 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all'
+            };
+
+            const step1 = await Swal.fire({
+                title: 'USDT Wallet (BEP20)',
+                html: `
+                    <p style="font-size: 12px; color: #6B6890; margin-bottom: 12px; line-height: 1.5;">Copy your <b>BNB Smart Chain (BEP20)</b> address from Trust Wallet, MetaMask or Binance and paste it here.</p>
+                    <div style="position: relative;">
+                        <input id="usdt-addr-input" type="text" placeholder="0x..." autocomplete="off" autocapitalize="off" spellcheck="false" class="glass-input" style="width: 100%; padding: 14px 76px 14px 16px; border-radius: 50px; font-size: 12px; font-family: monospace;" value="${walletEsc(currentUsdtAddress)}">
+                        <button type="button" id="usdt-paste-btn" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 8px 14px; border-radius: 50px; border: none; background: linear-gradient(to right, #3b82f6, #8b5cf6); color: #fff; font-size: 10px; font-weight: bold;">Paste</button>
+                    </div>
+                    <p style="font-size: 10px; color: #DC2626; margin-top: 12px; font-weight: bold; line-height: 1.4;">Network must be BEP20 (BNB Smart Chain) only. Entering an address from a wrong network may result in loss of your USDT.</p>`,
+                background: '#FFFFFF',
+                color: '#1E1B4B',
+                showCancelButton: true,
+                confirmButtonText: 'Next',
+                cancelButtonText: 'Cancel',
+                customClass: popupClasses,
+                buttonsStyling: false,
+                didOpen: () => {
+                    const pb = document.getElementById('usdt-paste-btn');
+                    if (pb) pb.addEventListener('click', async () => {
+                        try {
+                            const t = await navigator.clipboard.readText();
+                            document.getElementById('usdt-addr-input').value = (t || '').trim();
+                        } catch (e) {
+                            showToast("Paste was not allowed. Long-press the input field and paste manually.", "warning");
+                        }
+                    });
+                },
+                preConfirm: () => {
+                    const v = (document.getElementById('usdt-addr-input').value || '').trim();
+                    if (!USDT_ADDR_RE.test(v)) {
+                        Swal.showValidationMessage('Address must start with 0x and be 42 characters long.');
+                        return false;
+                    }
+                    return v;
+                }
+            });
+            if (!step1.isConfirmed) return;
+            const addr = step1.value;
+
+            if (addr === currentUsdtAddress) {
+                showToast("This address is already bound.", "warning");
+                return;
+            }
+
+            const step2 = await Swal.fire({
+                title: 'Confirm Address',
+                html: `<p style="font-size: 12px; color: #6B6890; margin-bottom: 10px;">USDT will be sent to this address. Please double-check it:</p>
+                       <p style="font-size: 11px; font-family: monospace; word-break: break-all; color: #4F46E5; background: #F5F2FF; border: 1px solid #DDD6FE; border-radius: 1rem; padding: 12px; font-weight: bold;">${walletEsc(addr)}</p>`,
+                icon: 'question',
+                iconColor: '#8b5cf6',
+                background: '#FFFFFF',
+                color: '#1E1B4B',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Bind',
+                cancelButtonText: 'Back',
+                customClass: popupClasses,
+                buttonsStyling: false
+            });
+            if (!step2.isConfirmed) return;
+
+            showLoader(true);
+            try {
+                await db.collection('users').doc(user.uid).update({
+                    usdtAddress: addr,
+                    usdtAddressAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                showToast("USDT wallet address bound successfully!", "success");
+            } catch (e) {
+                showToast("Bind failed: " + e.message, "error");
+            } finally {
+                showLoader(false);
+            }
+        }
+
         // TAB NAVIGATION UTILS
         function showTab(tab) {
             const sections = { tasks: 'tasks-section', spin: 'spin-section', wallet: 'wallet-section', refer: 'refer-section' };
@@ -1561,15 +2011,20 @@
             if (activeBtn) activeBtn.className = "tab-menu-btn tab-btn-active";
 
             if (tab === 'tasks') {
-                if (balanceCard) balanceCard.classList.remove('hidden'); 
-                if (checkInCard) checkInCard.classList.remove('hidden'); 
+                if (balanceCard) balanceCard.classList.remove('hidden');
+                if (checkInCard) checkInCard.classList.remove('hidden');
             } else if (tab === 'spin' || tab === 'wallet') {
-                if (balanceCard) balanceCard.classList.remove('hidden'); 
-                if (checkInCard) checkInCard.classList.add('hidden'); 
+                if (balanceCard) balanceCard.classList.remove('hidden');
+                if (checkInCard) checkInCard.classList.add('hidden');
             } else {
-                if (balanceCard) balanceCard.classList.add('hidden'); 
-                if (checkInCard) checkInCard.classList.add('hidden'); 
+                if (balanceCard) balanceCard.classList.add('hidden');
+                if (checkInCard) checkInCard.classList.add('hidden');
             }
+            // USDT wallet bar balance card ke saath hi dikhe/chhupe
+            const usdtBarEl = document.getElementById('usdt-bar');
+            if (usdtBarEl && balanceCard) usdtBarEl.classList.toggle('hidden', balanceCard.classList.contains('hidden'));
+            const withdrawBarEl = document.getElementById('withdraw-bar');
+            if (withdrawBarEl && balanceCard) withdrawBarEl.classList.toggle('hidden', balanceCard.classList.contains('hidden'));
 
             if (tab !== 'wallet') { closeQrScanner(); closeWalletSheet('receive'); closeWalletSheet('history'); }
         }
@@ -1648,8 +2103,10 @@
             checkSpinDailyReset(uid);
             updateSpinUI();
             
-            // Start UTC global countdown timer
-            setInterval(updateResetCountdown, 1000);
+            // Start UTC global countdown timer (sirf ek hi baar, login/logout par dobara nahi banega)
+            if (!window.spinCountdownTimer) {
+                window.spinCountdownTimer = setInterval(updateResetCountdown, 1000);
+            }
         }
 
         function checkSpinDailyReset(uid) {
@@ -1667,7 +2124,56 @@
             updateSpinUI();
         }
 
+        // Referral spins: bonusSpins (Firestore) jama hoti rehti hain, daily reset se alag
+        function updateRefSpinUI() {
+            const refStatus = document.getElementById('spin-ref-status');
+            const refBtn = document.getElementById('spin-ref-btn');
+            if (refStatus) refStatus.innerText = currentBonusSpins;
+            if (refBtn) {
+                if (currentBonusSpins > 0) {
+                    refBtn.classList.remove('hidden');
+                    refBtn.disabled = wheelSpinning;
+                    refBtn.innerText = `Use Referral Spin (${currentBonusSpins} left)`;
+                } else {
+                    refBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        async function useReferralSpin() {
+            const user = auth.currentUser;
+            if (!user || wheelSpinning || currentBonusSpins <= 0) return;
+            const adOv = document.getElementById('adOverlay');
+            if (adOv && !adOv.classList.contains('hidden')) return;
+
+            wheelSpinning = true;
+            updateRefSpinUI();
+            const uRef = db.collection('users').doc(user.uid);
+            let ok = false;
+            try {
+                await db.runTransaction(async tx => {
+                    const snap = await tx.get(uRef);
+                    const left = snap.exists ? (snap.data().bonusSpins || 0) : 0;
+                    if (left <= 0) return;
+                    tx.update(uRef, { bonusSpins: left - 1 });
+                    ok = true;
+                });
+            } catch (e) {
+                console.error("Referral spin failed: ", e);
+            }
+            if (!ok) {
+                wheelSpinning = false;
+                updateRefSpinUI();
+                showToast("Referral spin not available.", "warning");
+                return;
+            }
+            document.getElementById('spin-free-btn').disabled = true;
+            document.getElementById('spin-ad-btn').disabled = true;
+            runWheelAnimation(user.uid, 'referral');
+        }
+
         function updateSpinUI() {
+            updateRefSpinUI();
             const freeBtn = document.getElementById('spin-free-btn');
             const adBtn = document.getElementById('spin-ad-btn');
             const freeStatus = document.getElementById('spin-free-status');
@@ -1756,7 +2262,7 @@
             spinState.freeSpinsUsed = 1;
             saveSpinState(user.uid);
 
-            runWheelAnimation(user.uid);
+            runWheelAnimation(user.uid, 'free');
         }
 
         // Action: Watch ad for bonus spins
@@ -1805,21 +2311,61 @@
                         spinState.adSpinsUsed += 1;
                         saveSpinState(user.uid);
 
-                        runWheelAnimation(user.uid);
+                        runWheelAnimation(user.uid, 'ad');
                     }
                 }, 1000);
             }
         }
 
-        function runWheelAnimation(uid) {
+        async function runWheelAnimation(uid, spinType) {
             const wheel = document.getElementById('wheel');
             const resultBox = document.getElementById('spin-result-box');
-            if (!wheel || !resultBox) return;
+            if (!wheel || !resultBox) { wheelSpinning = false; return; }
 
+            wheelSpinning = true;
+            updateRefSpinUI();
             resultBox.innerHTML = "Spinning...";
 
-            const result = getSpinWeightedResult();
-            
+            // Global spin number (jackpot har N-vi spin par)
+            const spinInfo = await takeSpinNumber();
+            const result = spinInfo.jackpot
+                ? spinSlices.find(s => s.jackpot)
+                : getSpinWeightedResult();
+
+            // USDT WIN RECORD: spin shuru hote hi likho (page band karne se bhi record na bache)
+            if (spinInfo.jackpot) {
+                try {
+                    db.collection('usdtWins').doc('w' + spinInfo.spinNumber).set({
+                        uid: uid,
+                        name: (auth.currentUser && auth.currentUser.displayName) || "",
+                        spinNumber: spinInfo.spinNumber,
+                        amount: 1,
+                        status: 'won',
+                        day: getUTCTodayString(),
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(e => console.error("USDT win record failed: ", e));
+                } catch (e) {
+                    console.error("USDT win record failed: ", e);
+                }
+            }
+
+            // SPIN LOG: har spin ka record (spin shuru hote hi, taake page band karne se bhi record na bache)
+            // Fail ho to bhi spin normal chalti hai
+            try {
+                db.collection('spins').add({
+                    uid: uid,
+                    name: (auth.currentUser && auth.currentUser.displayName) || "",
+                    type: spinType || 'free',
+                    result: result.name,
+                    reward: result.reward,
+                    spinNumber: spinInfo.spinNumber,
+                    day: getUTCTodayString(),
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(e => console.error("Spin log failed: ", e));
+            } catch (e) {
+                console.error("Spin log failed: ", e);
+            }
+
             const sliceWidth = 360 / 7;
             const extraRotations = (6 + Math.floor(Math.random() * 4)) * 360; // 6 to 9 full spins
             const targetAngle = 360 - (result.id * sliceWidth) - (sliceWidth / 2);
@@ -1851,30 +2397,45 @@
                     } finally {
                         showLoader(false);
                     }
-                } else if (result.name === "Free Spin Again") {
-                    // Give user another free spin chance
-                    spinState.freeSpinsUsed = 0; 
-                    saveSpinState(uid);
-                    showToast("Bonus! You earned a free spin again.", "success");
+                } else if (result.jackpot) {
+                    // 1 USDT jackpot: win record upar spin ke start par ban chuka hai
+                    Swal.fire({
+                        title: 'You won 1 USDT!',
+                        html: `<p style="font-size: 12px; color: #6B6890; line-height: 1.5;">Spin #${walletEsc(spinInfo.spinNumber)} hit the 1 USDT jackpot. Your win has been recorded.</p>`,
+                        icon: 'success',
+                        iconColor: '#10b981',
+                        background: '#FFFFFF',
+                        color: '#1E1B4B',
+                        confirmButtonText: 'Awesome!',
+                        customClass: {
+                            popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+                            confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all cursor-pointer'
+                        },
+                        buttonsStyling: false
+                    });
                 } else {
                     showToast("Better luck next time!", "warning");
                 }
 
+                wheelSpinning = false;
                 updateSpinUI();
             }, 5000);
         }
 
         function getSpinWeightedResult() {
-            const random = Math.random() * 100;
+            // Jackpot slice random mein shamil nahi (sirf counter se nikalta hai); baqi chances ka total khud nikalte hain
+            const pool = spinSlices.filter(s => !s.jackpot);
+            const total = pool.reduce((sum, s) => sum + s.chance, 0);
+            const random = Math.random() * total;
             let cumulativeChance = 0;
 
-            for (const slice of spinSlices) {
+            for (const slice of pool) {
                 cumulativeChance += slice.chance;
                 if (random <= cumulativeChance) {
                     return slice;
                 }
             }
-            return spinSlices[spinSlices.length - 1];
+            return pool[pool.length - 1];
         }
     </script>
 <script>
@@ -1931,7 +2492,7 @@ function initWallet(user) {
             snap.docChanges().forEach(ch => {
                 if (ch.type === 'added' && !ch.doc.metadata.hasPendingWrites) {
                     const t = ch.doc.data();
-                    showToast(`Received ${t.amount} EXT from ${t.fromName || 'a user'}`, 'success');
+                    showToast(`Received ${Number(t.amount) || 0} EXT from ${String(t.fromName || 'a user').replace(/[<>&"']/g, '')}`, 'success');
                 }
             });
         }
@@ -2059,7 +2620,7 @@ async function sendExt() {
 
             toName = toDoc.data().name || "User";
 
-            tx.update(fromRef, { ext_balance: firebase.firestore.FieldValue.increment(-amount) });
+            tx.update(fromRef, { ext_balance: firebase.firestore.FieldValue.increment(-amount), lastTransferId: logRef.id });
             tx.update(toRef, { ext_balance: firebase.firestore.FieldValue.increment(amount) });
             // History record is part of the same atomic transaction
             tx.set(logRef, {
@@ -2183,11 +2744,405 @@ async function closeQrScanner() {
     }
 }
 
+// ================= USDT BALANCE (user ki jeeti hui USDT wins se) =================
+// Balance alag number nahi, balki usdtWins records se banta hai: status 'won' = available, 'requested' = withdraw pending
+let usdtWinsUnsub = null;
+let usdtWinsCache = [];
+
+function renderUsdtBalance() {
+    let available = 0, pending = 0;
+    usdtWinsCache.forEach(w => {
+        const amt = Number(w.amount) || 0;
+        if (w.status === 'won') available += amt;
+        else if (w.status === 'requested') pending += amt;
+    });
+
+    const balEl = document.getElementById('usdt-balance');
+    if (balEl) balEl.innerText = available.toFixed(2);
+
+    const statusEl = document.getElementById('withdraw-status-text');
+    if (statusEl) {
+        if (available > 0) {
+            statusEl.innerText = available.toFixed(2) + ' USDT available';
+            statusEl.style.color = '#4F46E5';
+        } else if (pending > 0) {
+            statusEl.innerText = 'Pending: ' + pending.toFixed(2) + ' USDT (24h)';
+            statusEl.style.color = '#B45309';
+        } else {
+            statusEl.innerText = 'No USDT to withdraw';
+            statusEl.style.color = '#6B6890';
+        }
+    }
+    renderUsdtHistory();
+}
+
+// USDT History: user ki wins aur unka status (Available / Pending / Paid + TxHash)
+function renderUsdtHistory() {
+    const box = document.getElementById('usdt-history-list');
+    if (!box) return;
+    if (usdtWinsCache.length === 0) {
+        box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No USDT wins yet.</p>`;
+        return;
+    }
+    const ms = w => (w.createdAt && typeof w.createdAt.toMillis === 'function') ? w.createdAt.toMillis() : Date.now();
+    const labelStyle = 'font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;';
+    const addrStyle = 'font-size: 9px; font-family: monospace; color: #4F46E5; word-break: break-all; line-height: 1.4;';
+    const rows = usdtWinsCache.slice().sort((a, b) => ms(b) - ms(a));
+
+    box.innerHTML = rows.map(w => {
+        const d = new Date(ms(w));
+        const dateTime = d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const amt = (Number(w.amount) || 0).toFixed(2);
+        let badge, extra = '';
+        if (w.status === 'paid') {
+            badge = `<span style="font-size: 10px; font-weight: 900; color: #059669; letter-spacing: 0.05em;">PAID &#10003;</span>`;
+            const hash = walletEsc(w.txHash || '');
+            extra = `<p style="${labelStyle}">Sent To</p><p style="${addrStyle}">${walletEsc(w.address || '')}</p>
+                     <p style="${labelStyle}">TxHash</p><p style="${addrStyle}">${hash}</p>
+                     ${w.txHash ? `<a href="https://bscscan.com/tx/${hash}" target="_blank" rel="noopener" class="gradient-text" style="display: inline-block; font-size: 9px; font-weight: bold; margin-top: 6px; letter-spacing: 0.1em; text-decoration: none;">VIEW ON BSCSCAN</a>` : ''}`;
+        } else if (w.status === 'requested') {
+            badge = `<span style="font-size: 10px; font-weight: 900; color: #B45309; letter-spacing: 0.05em;">PENDING</span>`;
+            extra = `<p style="${labelStyle}">Sending To</p><p style="${addrStyle}">${walletEsc(w.address || '')}</p>`;
+        } else {
+            badge = `<span style="font-size: 10px; font-weight: 900; color: #4F46E5; letter-spacing: 0.05em;">AVAILABLE</span>`;
+        }
+        return `
+            <div class="task-row" style="align-items: flex-start !important;">
+                <div class="task-details">
+                    <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">USDT Jackpot Win</p>
+                    <p class="text-slate-500 font-bold text-[10px] mt-1.5 tracking-wider">${w.spinNumber ? 'Spin #' + walletEsc(w.spinNumber) : ''}</p>
+                    <p class="text-slate-500 font-bold text-[10px] mt-1 tracking-widest">${walletEsc(dateTime).toUpperCase()}</p>
+                    ${extra}
+                </div>
+                <div class="task-action" style="flex-direction: column !important; align-items: flex-end !important; gap: 4px !important;">
+                    <span style="font-weight: 900; font-size: 15px; color: #059669; white-space: nowrap;">${amt} USDT</span>
+                    ${badge}
+                </div>
+            </div>`;
+    }).join("");
+}
+
+function openUsdtHistory() {
+    renderUsdtHistory();
+    openWalletSheet('usdtHistory');
+}
+
+function initUsdtWins(user) {
+    stopUsdtWins();
+    usdtWinsUnsub = db.collection('usdtWins').where('uid', '==', user.uid).onSnapshot(snap => {
+        usdtWinsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderUsdtBalance();
+    }, err => console.error("USDT wins listener error: ", err));
+}
+
+function stopUsdtWins() {
+    if (usdtWinsUnsub) { try { usdtWinsUnsub(); } catch (e) {} usdtWinsUnsub = null; }
+    usdtWinsCache = [];
+    renderUsdtBalance();
+}
+
+// ================= USDT WITHDRAW =================
+let withdrawInFlight = false;
+
+function usdtPopupClasses() {
+    return {
+        popup: 'glass-card rounded-[1.8rem] border border-[rgba(139,92,246,0.35)]',
+        actions: 'gap-4',
+        confirmButton: 'gradient-btn text-white px-6 py-2.5 rounded-full text-xs font-bold active:scale-95 transition-all cursor-pointer',
+        cancelButton: 'bg-slate-800 text-slate-400 border border-slate-700/50 px-6 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all'
+    };
+}
+
+async function withdrawUsdt() {
+    const user = auth.currentUser;
+    if (!user || withdrawInFlight) return;
+
+    const wins = usdtWinsCache.filter(w => w.status === 'won');
+    const pendingWins = usdtWinsCache.filter(w => w.status === 'requested');
+
+    // 1) Koi USDT nahi
+    if (wins.length === 0) {
+        if (pendingWins.length > 0) {
+            Swal.fire({
+                title: 'Withdrawal Pending',
+                text: 'Your withdrawal request is already pending. USDT will arrive within 24 hours.',
+                icon: 'info', iconColor: '#8b5cf6',
+                background: '#FFFFFF', color: '#1E1B4B',
+                confirmButtonText: 'OK',
+                customClass: usdtPopupClasses(), buttonsStyling: false
+            });
+        } else {
+            Swal.fire({
+                title: 'No USDT Yet',
+                text: "You don't have any USDT yet. Spin the wheel for a chance to win USDT!",
+                icon: 'info', iconColor: '#8b5cf6',
+                background: '#FFFFFF', color: '#1E1B4B',
+                confirmButtonText: 'OK',
+                customClass: usdtPopupClasses(), buttonsStyling: false
+            });
+        }
+        return;
+    }
+
+    // 2) USDT hai magar address bind nahi
+    if (!currentUsdtAddress) {
+        showToast("Bind your USDT (BEP20) address first.", "warning");
+        openUsdtBind();
+        return;
+    }
+
+    // 3) Confirm
+    const total = wins.reduce((s, w) => s + (Number(w.amount) || 0), 0);
+    const step = await Swal.fire({
+        title: 'Withdraw USDT',
+        html: `<p style="font-size: 12px; color: #6B6890; margin-bottom: 10px;">Withdraw <b>${total.toFixed(2)} USDT</b> to this address?</p>
+               <p style="font-size: 11px; font-family: monospace; word-break: break-all; color: #4F46E5; background: #F5F2FF; border: 1px solid #DDD6FE; border-radius: 1rem; padding: 12px; font-weight: bold;">${walletEsc(currentUsdtAddress)}</p>`,
+        icon: 'question', iconColor: '#8b5cf6',
+        background: '#FFFFFF', color: '#1E1B4B',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Withdraw',
+        cancelButtonText: 'Cancel',
+        customClass: usdtPopupClasses(), buttonsStyling: false
+    });
+    if (!step.isConfirmed) return;
+
+    // 4) Request banao: jeete hue sab wins 'requested' ho jate hain, address usi waqt save
+    withdrawInFlight = true;
+    showLoader(true);
+    try {
+        const batch = db.batch();
+        wins.forEach(w => {
+            batch.update(db.collection('usdtWins').doc(w.id), {
+                status: 'requested',
+                address: currentUsdtAddress,
+                requestedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+        await batch.commit();
+        showLoader(false);
+        Swal.fire({
+            title: 'Request Received',
+            text: 'Your withdrawal request has been received. USDT will arrive in your wallet within 24 hours.',
+            icon: 'success', iconColor: '#10b981',
+            background: '#FFFFFF', color: '#1E1B4B',
+            confirmButtonText: 'OK',
+            customClass: usdtPopupClasses(), buttonsStyling: false
+        });
+    } catch (e) {
+        showLoader(false);
+        showToast("Withdraw failed: " + e.message, "error");
+    } finally {
+        withdrawInFlight = false;
+    }
+}
+
+// ================= SPIN HISTORY =================
+async function openSpinHistory() {
+    const user = auth.currentUser;
+    if (!user) return;
+    openWalletSheet('spinHistory');
+    const box = document.getElementById('spin-history-list');
+    if (!box) return;
+    box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Loading...</p>`;
+
+    try {
+        // Sirf uid se query (index ki zaroorat nahi), sorting yahin karte hain
+        const snap = await db.collection('spins').where('uid', '==', user.uid).get();
+        const ms = t => (t.createdAt && typeof t.createdAt.toMillis === 'function') ? t.createdAt.toMillis() : Date.now();
+        const rows = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ms(b) - ms(a)).slice(0, 50);
+
+        if (rows.length === 0) {
+            box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No spins yet.</p>`;
+            return;
+        }
+
+        const typeLabel = { free: 'Daily Free Spin', ad: 'Ad Spin', referral: 'Referral Spin' };
+        box.innerHTML = rows.map(r => {
+            const isUsdt = (r.result === '1 USDT');
+            const won = isUsdt ? '1 USDT' : (Number(r.reward) > 0 ? `+${Number(r.reward)} EXT` : '');
+            const color = isUsdt ? '#059669' : (Number(r.reward) > 0 ? '#4F46E5' : '#6B6890');
+            const d = new Date(ms(r));
+            const dateTime = d.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const spinNo = r.spinNumber ? ` &bull; Spin #${walletEsc(r.spinNumber)}` : '';
+            return `
+                <div class="task-row">
+                    <div class="task-details">
+                        <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${walletEsc(r.result || '-')}</p>
+                        <p class="text-slate-500 font-bold text-[10px] mt-1.5 tracking-wider">${walletEsc(typeLabel[r.type] || 'Spin')}${spinNo}</p>
+                        <p class="text-slate-500 font-bold text-[10px] mt-1 tracking-widest">${walletEsc(dateTime).toUpperCase()}</p>
+                    </div>
+                    <div class="task-action">
+                        <span style="font-weight: 900; font-size: 14px; color: ${color}; white-space: nowrap;">${won}</span>
+                    </div>
+                </div>`;
+        }).join("");
+    } catch (e) {
+        console.error("Spin history failed: ", e);
+        box.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Could not load history.</p>`;
+    }
+}
+
+// ================= ADMIN: WITHDRAW REQUESTS =================
+// Admin sab usdtWins dekhta hai: 'requested' = bhejna baqi, 'paid' = bhej diya (TxHash ke saath)
+let adminWinsUnsub = null;
+let adminWinsCache = [];
+let adminReqGroups = [];
+
+function adminMs(t, field) {
+    const v = t[field];
+    return (v && typeof v.toMillis === 'function') ? v.toMillis() : 0;
+}
+
+function adminGroupWins(list, keyFn) {
+    const map = {};
+    list.forEach(w => {
+        const k = keyFn(w);
+        if (!map[k]) map[k] = { uid: w.uid, name: w.name || 'User', address: w.address || '', txHash: w.txHash || '', total: 0, ids: [], spins: [], reqMs: 0, paidMs: 0 };
+        const g = map[k];
+        g.total += Number(w.amount) || 0;
+        g.ids.push(w.id);
+        if (w.spinNumber) g.spins.push(w.spinNumber);
+        const r = adminMs(w, 'requestedAt'); if (r && (!g.reqMs || r < g.reqMs)) g.reqMs = r;
+        const p = adminMs(w, 'paidAt'); if (p > g.paidMs) g.paidMs = p;
+    });
+    return Object.values(map);
+}
+
+function renderAdminWithdrawals() {
+    const reqBox = document.getElementById('admin-withdraw-list');
+    const paidBox = document.getElementById('admin-paid-list');
+    if (!reqBox || !paidBox) return;
+
+    const fmt = ms => ms ? new Date(ms).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now';
+    const labelStyle = 'font-size: 9px; font-weight: bold; color: #6B6890; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px;';
+    const addrStyle = 'font-size: 10px; font-family: monospace; color: #4F46E5; word-break: break-all; line-height: 1.4;';
+
+    // Pending requests (sab se purani pehle)
+    adminReqGroups = adminGroupWins(adminWinsCache.filter(w => w.status === 'requested'), w => w.uid + '|' + (w.address || ''))
+        .sort((a, b) => (a.reqMs || Infinity) - (b.reqMs || Infinity));
+
+    if (adminReqGroups.length === 0) {
+        reqBox.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No pending requests.</p>`;
+    } else {
+        reqBox.innerHTML = adminReqGroups.map((g, i) => `
+            <div class="task-row" style="align-items: flex-start !important;">
+                <div class="task-details">
+                    <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${walletEsc(g.name)}</p>
+                    <p class="gradient-text" style="font-size: 15px; font-weight: 900; margin-top: 4px;">${g.total.toFixed(2)} USDT</p>
+                    <p style="${labelStyle}">BEP20 Address</p>
+                    <p style="${addrStyle}">${walletEsc(g.address)}</p>
+                    <p style="${labelStyle}">Spin # (verify in spin log)</p>
+                    <p style="${addrStyle}">${walletEsc(g.spins.join(', ') || '-')}</p>
+                    <p class="text-slate-500 font-bold text-[10px] tracking-widest" style="margin-top: 8px;">${walletEsc(fmt(g.reqMs)).toUpperCase()}</p>
+                </div>
+                <div class="task-action" style="flex-direction: column !important; gap: 8px !important; align-items: stretch !important;">
+                    <button onclick="copyAdminAddr(${i})" class="bg-slate-800 text-slate-300 border border-slate-700/50 px-4 py-2 rounded-full text-[10px] font-bold active:scale-95 transition-all">Copy</button>
+                    <button onclick="approveWithdrawGroup(${i})" class="gradient-btn text-white px-4 py-2 rounded-full text-[10px] font-bold active:scale-95 transition-all">Approve</button>
+                </div>
+            </div>`).join("");
+    }
+
+    // Paid history (naya pehle, aakhri 20)
+    const paid = adminGroupWins(adminWinsCache.filter(w => w.status === 'paid'), w => w.uid + '|' + (w.address || '') + '|' + (w.txHash || ''))
+        .sort((a, b) => b.paidMs - a.paidMs).slice(0, 20);
+
+    if (paid.length === 0) {
+        paidBox.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">No paid withdrawals yet.</p>`;
+    } else {
+        paidBox.innerHTML = paid.map(g => `
+            <div class="task-row" style="align-items: flex-start !important;">
+                <div class="task-details">
+                    <p class="font-bold text-slate-200 text-sm tracking-wide break-words leading-tight">${walletEsc(g.name)}</p>
+                    <p style="${labelStyle}">To</p>
+                    <p style="${addrStyle}">${walletEsc(g.address)}</p>
+                    <p style="${labelStyle}">TxHash</p>
+                    <p style="${addrStyle}">${walletEsc(g.txHash)}</p>
+                    <p class="text-slate-500 font-bold text-[10px] tracking-widest" style="margin-top: 8px;">${walletEsc(fmt(g.paidMs)).toUpperCase()}</p>
+                </div>
+                <div class="task-action">
+                    <span style="font-weight: 900; font-size: 14px; color: #059669; white-space: nowrap;">${g.total.toFixed(2)} USDT</span>
+                </div>
+            </div>`).join("");
+    }
+}
+
+function initAdminWithdrawals(user) {
+    stopAdminWithdrawals();
+    if (user.uid !== ADMIN_UID) return;
+    adminWinsUnsub = db.collection('usdtWins').onSnapshot(snap => {
+        adminWinsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderAdminWithdrawals();
+    }, err => console.error("Admin USDT wins listener error: ", err));
+}
+
+function stopAdminWithdrawals() {
+    if (adminWinsUnsub) { try { adminWinsUnsub(); } catch (e) {} adminWinsUnsub = null; }
+    adminWinsCache = [];
+}
+
+function copyAdminAddr(i) {
+    const g = adminReqGroups[i];
+    if (!g) return;
+    navigator.clipboard.writeText(g.address).then(() => showToast("Address copied!", "success"));
+}
+
+async function approveWithdrawGroup(i) {
+    const user = auth.currentUser;
+    const g = adminReqGroups[i];
+    if (!user || user.uid !== ADMIN_UID || !g) return;
+
+    const res = await Swal.fire({
+        title: 'Approve Withdrawal',
+        html: `<p style="font-size: 12px; color: #6B6890; margin-bottom: 8px;">Send <b>${g.total.toFixed(2)} USDT (BEP20)</b> to <b>${walletEsc(g.name)}</b> first, then paste the TxHash.</p>
+               <p style="font-size: 10px; font-family: monospace; word-break: break-all; color: #4F46E5; background: #F5F2FF; border: 1px solid #DDD6FE; border-radius: 1rem; padding: 10px; font-weight: bold; margin-bottom: 12px;">${walletEsc(g.address)}</p>
+               <input id="admin-txhash-input" type="text" placeholder="0x... TxHash" autocomplete="off" autocapitalize="off" spellcheck="false" class="glass-input" style="width: 100%; padding: 12px 16px; border-radius: 50px; font-size: 11px; font-family: monospace;">`,
+        background: '#FFFFFF',
+        color: '#1E1B4B',
+        showCancelButton: true,
+        confirmButtonText: 'Mark as Paid',
+        cancelButtonText: 'Cancel',
+        customClass: usdtPopupClasses(),
+        buttonsStyling: false,
+        preConfirm: () => {
+            const v = (document.getElementById('admin-txhash-input').value || '').trim();
+            if (!/^0x[a-fA-F0-9]{64}$/.test(v)) {
+                Swal.showValidationMessage('TxHash must start with 0x and be 66 characters long.');
+                return false;
+            }
+            return v;
+        }
+    });
+    if (!res.isConfirmed) return;
+
+    showLoader(true);
+    try {
+        const batch = db.batch();
+        g.ids.forEach(id => {
+            batch.update(db.collection('usdtWins').doc(id), {
+                status: 'paid',
+                txHash: res.value,
+                paidAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        });
+        await batch.commit();
+        showToast("Marked as paid.", "success");
+    } catch (e) {
+        showToast("Approve failed: " + e.message, "error");
+    } finally {
+        showLoader(false);
+    }
+}
+
 auth.onAuthStateChanged(user => {
     if (user) {
         initWallet(user);
+        initUsdtWins(user);
+        initAdminWithdrawals(user);
     } else {
         stopWalletListeners();
+        stopUsdtWins();
+        stopAdminWithdrawals();
+        renderAdminWithdrawals();
         closeQrScanner();
     }
 });
