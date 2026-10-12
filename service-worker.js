@@ -1,4 +1,4 @@
-const CACHE_NAME = "extron-v4";
+const CACHE_NAME = "extron-v5";
 
 const urlsToCache = [
   "./",
