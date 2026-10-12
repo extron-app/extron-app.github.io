@@ -782,6 +782,12 @@
                             <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6B6890; margin-bottom: 8px; letter-spacing: 0.05em;">Copy your link</p>
                             <p id="ref-link" style="font-size: 10px; font-family: monospace; color: #4F46E5; word-break: break-all; margin-bottom: 16px; background: #FFFFFF; padding: 12px; border-radius: 1rem; border: 1px solid #DDD6FE; font-weight: bold;">Generating...</p>
                             <button onclick="copyRef()" class="w-full gradient-btn text-white py-4 rounded-full text-xs font-bold active:scale-95 transition-all shadow-md shadow-blue-500/10">Copy Referral Link</button>
+
+                            <div style="text-align: center; margin-top: 20px; padding-top: 18px; border-top: 1px dashed #DDD6FE;">
+                                <p style="font-size: 9px; text-transform: uppercase; font-weight: bold; color: #6B6890; margin-bottom: 10px; letter-spacing: 0.05em;">Or let your friend scan</p>
+                                <div id="ref-qr" style="background: #fff; padding: 10px; border-radius: 12px; display: inline-block;"></div>
+                                <p style="font-size: 10px; color: #6B6890; margin-top: 8px;">Scan with phone camera to open signup with your referral</p>
+                            </div>
                         </div>
 
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 8px;">
@@ -1057,6 +1063,12 @@
         const dashboardPage = document.getElementById('dashboard-page');
         const loader = document.getElementById('loader');
 
+        // Page khulte hi ?ref= save kar lo (QR / link scan ke baad signup se pehle reload ho to bhi inviter yaad rahe)
+        try {
+            const _r = new URLSearchParams(window.location.search).get('ref');
+            if (_r && /^[A-Za-z0-9]{20,40}$/.test(_r)) localStorage.setItem('ext_pending_ref', _r);
+        } catch (e) {}
+
         let userCompletedTasks = [];
         let currentTasksSnap = null; 
         let activeIntervals = {};   
@@ -1190,8 +1202,24 @@
                 }
 
                 const currentUrl = window.location.origin + window.location.pathname;
-                document.getElementById('ref-link').innerText = `${currentUrl}?ref=${user.uid}`;
-                
+                const refLinkFull = `${currentUrl}?ref=${user.uid}`;
+                document.getElementById('ref-link').innerText = refLinkFull;
+
+                // Referral QR: usi link ka QR jo Copy button copy karta hai
+                try {
+                    const refQrBox = document.getElementById('ref-qr');
+                    if (refQrBox) {
+                        refQrBox.innerHTML = "";
+                        if (typeof QRCode !== 'undefined') {
+                            new QRCode(refQrBox, { text: refLinkFull, width: 180, height: 180, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.M });
+                        } else {
+                            refQrBox.innerText = "QR unavailable";
+                        }
+                    }
+                } catch (qrErr) {
+                    console.error("Referral QR failed: ", qrErr);
+                }
+
                 // Initialize Spin state for this logged in user
                 initSpinLimits(user.uid);
 
@@ -1403,6 +1431,10 @@
         async function checkUserEntry(user) {
             const urlParams = new URLSearchParams(window.location.search);
             let referredBy = urlParams.get('ref');
+            // URL se ref na mile (reload / app install ke baad) to pehle save kiya hua ref use karo
+            if (!referredBy) {
+                try { referredBy = localStorage.getItem('ext_pending_ref'); } catch (e) {}
+            }
             if (referredBy && !/^[A-Za-z0-9]{20,40}$/.test(referredBy)) referredBy = null;
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
@@ -1475,6 +1507,8 @@
 
                 // Set browser memory key
                 localStorage.setItem(deviceKey, 'true');
+                // Account ban gaya, saved ref ki ab zaroorat nahi
+                try { localStorage.removeItem('ext_pending_ref'); } catch (e) {}
             } else {
                 // Purana user: is device ka registry record bana do (agar pehle se nahi), taake yahan naya account na bane
                 try {
