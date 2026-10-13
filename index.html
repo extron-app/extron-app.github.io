@@ -1699,7 +1699,30 @@
                 <div style="margin-top: 25px !important;">${buttonHtml}</div>`;
         }
 
-        // DAILY CHECK-IN WITH ADBLOCK SECURITY & AUTOMATIC PAYOUT
+        // ADSTERRA: script sirf EK baar load hoti hai. true = ad load ho gaya, false = block hua / timeout
+        // Block ho to check-in aur spin bina ad ke chalte hain (streak/spin kabhi fail nahi hoga)
+        let adLoadPromise = null;
+        function loadAdOnce() {
+            if (adLoadPromise) return adLoadPromise;
+            adLoadPromise = new Promise(resolve => {
+                let done = false;
+                const finish = ok => { if (!done) { done = true; resolve(ok); } };
+                try {
+                    const s = document.createElement('script');
+                    s.src = "https://pl30169353.effectivecpmnetwork.com/09/0b/5a/090b5ad8ee5d2c00eb69e74776d15961.js";
+                    s.onload = () => finish(true);
+                    s.onerror = () => finish(false);
+                    document.body.appendChild(s);
+                    // DNS-level blockers kabhi error nahi dete, isliye timeout
+                    setTimeout(() => finish(false), 4000);
+                } catch (e) {
+                    finish(false);
+                }
+            });
+            return adLoadPromise;
+        }
+
+        // DAILY CHECK-IN (ad aaye to theek, block ho to bina ad ke bhi reward) & AUTOMATIC PAYOUT
         async function claimDailyCheckIn() {
             const user = auth.currentUser;
             if (!user) return;
@@ -1730,28 +1753,15 @@
 
                 showLoader(false);
 
-                // Dynamically load Adsterra JavaScript with Error Handling
-                const adScript = document.createElement('script');
-                adScript.src = "https://pl30169353.effectivecpmnetwork.com/09/0b/5a/090b5ad8ee5d2c00eb69e74776d15961.js";
-                
-                let isAdBlocked = false;
-                adScript.onerror = () => {
-                    isAdBlocked = true;
-                };
+                if (claimBtn) claimBtn.innerText = "Processing...";
 
-                document.body.appendChild(adScript);
-
-                if (claimBtn) claimBtn.innerText = "Ad Loading...";
-
-                // Background Timer (5 seconds) to award balance
-                setTimeout(async () => {
-                    if (isAdBlocked) {
-                        showToast("Ad blocked! Please disable AdBlocker to claim rewards.", "error");
-                        if (claimBtn) {
-                            claimBtn.disabled = false;
-                            claimBtn.innerText = "Claim Day Reward";
-                        }
-                        return;
+                (async () => {
+                    // Ad ek baar load; load ho jaye to 5 sec rukte hain, block ho to seedha reward
+                    const t0 = Date.now();
+                    const adOk = await loadAdOnce();
+                    if (adOk) {
+                        const rest = 5000 - (Date.now() - t0);
+                        if (rest > 0) await new Promise(r => setTimeout(r, rest));
                     }
 
                     showLoader(true);
@@ -1789,7 +1799,7 @@
                     } finally {
                         showLoader(false);
                     }
-                }, 5000); 
+                })();
 
             } catch (e) {
                 showToast("Check-in failed: " + e.message, "error");
@@ -2421,7 +2431,7 @@
         }
 
         // Action: Watch ad for bonus spins
-        function watchAdForSpin() {
+        async function watchAdForSpin() {
             const user = auth.currentUser;
             if (!user) return;
 
@@ -2431,44 +2441,41 @@
             document.getElementById('spin-free-btn').disabled = true;
             document.getElementById('spin-ad-btn').disabled = true;
 
-            // Trigger Mock Ad Video overlay
             const adOverlay = document.getElementById('adOverlay');
             const adTimer = document.getElementById('adTimer');
-            
+
+            // Spin dene ka common kaam (ad aaye ya na aaye, dono mein yehi)
+            const grantAdSpin = () => {
+                spinState.adSpinsUsed += 1;
+                saveSpinState(user.uid);
+                runWheelAnimation(user.uid, 'ad');
+            };
+
             if (adOverlay && adTimer) {
                 adOverlay.classList.remove('hidden');
+                adTimer.innerText = "...";
+
+                // Ad ek baar load; block ho ya timeout ho to bina ad ke spin mil jati hai
+                const adOk = await loadAdOnce();
+                if (!adOk) {
+                    adOverlay.classList.add('hidden');
+                    grantAdSpin();
+                    return;
+                }
+
                 let timeLeft = 5;
                 adTimer.innerText = timeLeft;
-
-                // Dynamically loading script logic (AdBlock check included)
-                const adScript = document.createElement('script');
-                adScript.src = "https://pl30169353.effectivecpmnetwork.com/09/0b/5a/090b5ad8ee5d2c00eb69e74776d15961.js";
-                
-                let isAdBlocked = false;
-                adScript.onerror = () => {
-                    isAdBlocked = true;
-                };
-                document.body.appendChild(adScript);
-
                 const adInterval = setInterval(() => {
                     timeLeft--;
                     adTimer.innerText = timeLeft;
                     if (timeLeft <= 0) {
                         clearInterval(adInterval);
                         adOverlay.classList.add('hidden');
-
-                        if (isAdBlocked) {
-                            showToast("Ad blocked! Please disable AdBlocker to claim extra spins.", "error");
-                            updateSpinUI();
-                            return;
-                        }
-
-                        spinState.adSpinsUsed += 1;
-                        saveSpinState(user.uid);
-
-                        runWheelAnimation(user.uid, 'ad');
+                        grantAdSpin();
                     }
                 }, 1000);
+            } else {
+                grantAdSpin();
             }
         }
 
